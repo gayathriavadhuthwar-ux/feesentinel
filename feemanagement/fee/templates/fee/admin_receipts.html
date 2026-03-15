@@ -185,7 +185,7 @@
             <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{k}}={{v|urlencode}}&{% endif %}{% endfor %}page={{ receipts.next_page_number }}">Next &raquo;</a>
         {% endif %}
     </div>
-    {% endif %}
+    <!-- Removed extra endif causing template error -->
 
     <script>
     // Simple table sort by column (text only)

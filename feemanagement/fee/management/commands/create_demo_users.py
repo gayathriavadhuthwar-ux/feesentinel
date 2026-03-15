@@ -17,13 +17,24 @@ class Command(BaseCommand):
         else:
             self.stdout.write('Demo admin user already exists.')
 
-        # Create student user
-        if not User.objects.filter(username=settings.DEMO_STUDENT_USERNAME).exists():
+        # Create student user 1
+        if not User.objects.filter(username=settings.DEMO_STUDENT1_USERNAME).exists():
             User.objects.create_user(
-                username=settings.DEMO_STUDENT_USERNAME,
-                password=settings.DEMO_STUDENT_PASSWORD,
-                email='studentreview@example.com'
+                username=settings.DEMO_STUDENT1_USERNAME,
+                password=settings.DEMO_STUDENT1_PASSWORD,
+                email='studentreview1@example.com'
             )
-            self.stdout.write(self.style.SUCCESS('Demo student user created.'))
+            self.stdout.write(self.style.SUCCESS('Demo student user 1 created.'))
         else:
-            self.stdout.write('Demo student user already exists.')
+            self.stdout.write('Demo student user 1 already exists.')
+
+        # Create student user 2
+        if not User.objects.filter(username=settings.DEMO_STUDENT2_USERNAME).exists():
+            User.objects.create_user(
+                username=settings.DEMO_STUDENT2_USERNAME,
+                password=settings.DEMO_STUDENT2_PASSWORD,
+                email='studentreview2@example.com'
+            )
+            self.stdout.write(self.style.SUCCESS('Demo student user 2 created.'))
+        else:
+            self.stdout.write('Demo student user 2 already exists.')

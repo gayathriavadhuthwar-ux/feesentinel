@@ -116,8 +116,10 @@ AUTH_PASSWORD_VALIDATORS = [
 # Demo user credentials for review
 DEMO_ADMIN_USERNAME = 'adminreview'
 DEMO_ADMIN_PASSWORD = 'adminpass123'
-DEMO_STUDENT_USERNAME = 'studentreview'
-DEMO_STUDENT_PASSWORD = 'studentpass123'
+DEMO_STUDENT1_USERNAME = 'studentreview1'
+DEMO_STUDENT1_PASSWORD = 'studentpass123'
+DEMO_STUDENT2_USERNAME = 'studentreview2'
+DEMO_STUDENT2_PASSWORD = 'studentpass456'
 
 
 # Internationalization
