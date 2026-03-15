@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}Student Login / Sign Up{% endblock %}
+{% block content %}
+<style>
+.auth-container {
+    max-width: 400px;
+    margin: 2em auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px #0001;
+    overflow: hidden;
+}
+.auth-tabs {
+    display: flex;
+    cursor: pointer;
+    background: #f0f0f0;
+}
+.auth-tab {
+    flex: 1;
+    text-align: center;
+    padding: 1em;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+.auth-tab.active {
+    background: #fff;
+    border-bottom: 2px solid #3498db;
+}
+.auth-form {
+    padding: 2em;
+    display: none;
+}
+.auth-form.active {
+    display: block;
+}
+.auth-form input {
+    width: 100%;
+    margin-bottom: 1em;
+    padding: 0.7em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+.auth-form button {
+    width: 100%;
+    padding: 0.7em;
+    background: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+}
+</style>
+<div class="auth-container">
+    <div class="auth-tabs">
+        <div class="auth-tab active" id="loginTab" onclick="showTab('login')">Login</div>
+        <div class="auth-tab" id="signupTab" onclick="showTab('signup')">Sign Up</div>
+    </div>
+    <div class="auth-form active" id="loginForm">
+        <form method="post" action="{% url 'student_login' %}">
+            {% csrf_token %}
+            <input type="text" name="hallticket_number" placeholder="Hallticket Number" required>
+            <input type="text" name="username" placeholder="Username or Email" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+    <div class="auth-form" id="signupForm">
+        <form method="post" action="{% url 'register' %}">
+            {% csrf_token %}
+            <input type="text" name="hallticket_number" placeholder="Hallticket Number" required>
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password1" placeholder="Password" required>
+            <input type="password" name="password2" placeholder="Confirm Password" required>
+            <button type="submit">Sign Up</button>
+        </form>
+    </div>
+</div>
+<script>
+function showTab(tab) {
+    document.getElementById('loginTab').classList.remove('active');
+    document.getElementById('signupTab').classList.remove('active');
+    document.getElementById('loginForm').classList.remove('active');
+    document.getElementById('signupForm').classList.remove('active');
+    if (tab === 'login') {
+        document.getElementById('loginTab').classList.add('active');
+        document.getElementById('loginForm').classList.add('active');
+    } else {
+        document.getElementById('signupTab').classList.add('active');
+        document.getElementById('signupForm').classList.add('active');
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin - Receipts{% endblock %}
+
+
+{% block content %}
+    <h1>All Receipts</h1>
+
+    {% if messages %}
+        <ul class="messages">
+        {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+        <style>
+            .admin-container {
+                max-width: 700px;
+                margin: 24px auto;
+                background: #fff;
+                border-radius: 12px;
+                box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+                padding: 24px;
+            }
+            .admin-header {
+                font-size: 2rem;
+                font-weight: 700;
+                margin-bottom: 18px;
+                color: #2a2a2a;
+                text-align: center;
+            }
+            .admin-filters {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 12px;
+                margin-bottom: 18px;
+            }
+            .admin-filters label {
+                font-weight: 500;
+                color: #333;
+                margin-right: 4px;
+            }
+            .admin-filters input, .admin-filters select {
+                border-radius: 6px;
+                border: 1px solid #ddd;
+                padding: 6px;
+                font-size: 1rem;
+            }
+            .admin-filters button, .admin-filters a.button {
+                background: #0077b6;
+                color: #fff;
+                border: none;
+                border-radius: 6px;
+                padding: 8px 16px;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: pointer;
+                text-decoration: none;
+            }
+            .admin-filters a.button {
+                margin-left: 1em;
+            }
+            .admin-filters a {
+                color: #0077b6;
+                text-decoration: underline;
+                font-weight: 500;
+            }
+            .receipt-card {
+                background: #fafafa;
+                border-radius: 8px;
+                box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+                margin-bottom: 18px;
+                padding: 16px;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+            .receipt-label {
+                font-weight: 600;
+                color: #0077b6;
+                margin-right: 6px;
+            }
+            .badge {
+                display: inline-block;
+                padding: 4px 10px;
+                border-radius: 12px;
+                font-size: 0.9rem;
+                font-weight: 600;
+                color: #fff;
+            }
+            .badge-normal {
+                background: #38b000;
+            }
+            .badge-duplicate {
+                background: #d90429;
+            }
+            .view-link {
+                color: #0077b6;
+                font-weight: 500;
+                text-decoration: none;
+            }
+            .view-link:hover {
+                color: #023e8a;
+            }
+            @media (max-width: 700px) {
+                .admin-container {
+                    max-width: 98vw;
+                    padding: 8px;
+                }
+                .admin-header {
+                    font-size: 1.3rem;
+                }
+            }
+        </style>
+        <div class="admin-container">
+            <div class="admin-header">All Receipts</div>
+            {% if messages %}
+                <ul class="messages">
+                {% for message in messages %}
+                    <li class="{{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+            <form method="get" class="admin-filters">
+                <label>Student:</label>
+                <input type="text" name="student" value="{{ request.GET.student }}" placeholder="Student username">
+                <label>Hallticket:</label>
+                <input type="text" name="hallticket" value="{{ request.GET.hallticket }}" placeholder="Hallticket number">
+                <label>UTR:</label>
+                <input type="text" name="utr" value="{{ request.GET.utr }}" placeholder="UTR">
+                <label>Fee Type:</label>
+                <select name="fee_type">
+                    <option value="">All</option>
+                    {% for value, display in fee_types %}
+                        <option value="{{ value }}" {% if request.GET.fee_type == value %}selected{% endif %}>{{ display }}</option>
+                    {% endfor %}
+                </select>
+                <label>Date From:</label>
+                <input type="date" name="date_from" value="{{ request.GET.date_from }}">
+                <label>Date To:</label>
+                <input type="date" name="date_to" value="{{ request.GET.date_to }}">
+                <button type="submit">Filter</button>
+                <a href="{% url 'admin_receipts' %}">Clear</a>
+                <a href="{% url 'export_receipts_csv' %}?{{ request.GET.urlencode }}" class="button">Export to CSV</a>
+            </form>
+            {% for receipt in receipts %}
+                <div class="receipt-card">
+                    <div><span class="receipt-label">Student:</span> {{ receipt.student.username }}</div>
+                    <div><span class="receipt-label">Hallticket Number:</span> {{ receipt.hallticket_number }}</div>
+                    <div><span class="receipt-label">Fee Type:</span> {{ receipt.get_fee_type_display }}</div>
+                    <div><span class="receipt-label">Submitted At:</span> {{ receipt.submitted_at }}</div>
+                    <div><span class="receipt-label">UTR:</span> {{ receipt.utr }}</div>
+                    <div><span class="receipt-label">Status:</span> {% if receipt.is_duplicate %}<span class="badge badge-duplicate">Duplicate</span>{% else %}<span class="badge badge-normal">Normal</span>{% endif %}</div>
+                    <div><span class="receipt-label">Duplicate Of:</span> {% if receipt.duplicate_of %}{{ receipt.duplicate_of.student.username }}{% else %}—{% endif %}</div>
+                    <div><span class="receipt-label">Image:</span> <a class="view-link" style="font-weight:600;" href="{{ receipt.image.url }}" target="_blank">View</a></div>
+                    <div><span class="receipt-label">Extracted Text:</span> {{ receipt.extracted_text|truncatechars:100 }}</div>
+                </div>
+            {% endfor %}
+            {% if receipts.has_other_pages %}
+            <div class="pagination" style="margin: 1em 0; text-align:center;">
+                <span>Page {{ receipts.number }} of {{ receipts.paginator.num_pages }}:</span>
+                {% if receipts.has_previous %}
+                    <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{k}}={{v|urlencode}}&{% endif %}{% endfor %}page={{ receipts.previous_page_number }}">&laquo; Prev</a>
+                {% endif %}
+                {% for num in receipts.paginator.page_range %}
+                    {% if num == receipts.number %}
+                        <strong>{{ num }}</strong>
+                    {% elif num > receipts.number|add:'-3' and num < receipts.number|add:'3' %}
+                        <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{k}}={{v|urlencode}}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                {% if receipts.has_next %}
+                    <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{k}}={{v|urlencode}}&{% endif %}{% endfor %}page={{ receipts.next_page_number }}">Next &raquo;</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% for num in receipts.paginator.page_range %}
+            {% if num == receipts.number %}
+                <strong>{{ num }}</strong>
+            {% elif num > receipts.number|add:'-3' and num < receipts.number|add:'3' %}
+                <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{k}}={{v|urlencode}}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+        {% if receipts.has_next %}
+            <a href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{k}}={{v|urlencode}}&{% endif %}{% endfor %}page={{ receipts.next_page_number }}">Next &raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <script>
+    // Simple table sort by column (text only)
+    function sortTable(n) {
+        var table = document.getElementById("receiptsTable");
+        var rows = Array.from(table.rows).slice(1); // skip header
+        var switching = true;
+        var dir = "asc";
+        var switchcount = 0;
+        while (switching) {
+            switching = false;
+            for (var i = 1; i < rows.length - 1; i++) {
+                var x = rows[i].getElementsByTagName("TD")[n];
+                var y = rows[i + 1].getElementsByTagName("TD")[n];
+                var shouldSwitch = false;
+                if (dir == "asc") {
+                    if (x.innerText.toLowerCase() > y.innerText.toLowerCase()) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                } else if (dir == "desc") {
+                    if (x.innerText.toLowerCase() < y.innerText.toLowerCase()) {
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+            }
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                switchcount++;
+            } else {
+                if (switchcount == 0 && dir == "asc") {
+                    dir = "desc";
+                    switching = true;
+                }
+            }
+        }
+    }
+    </script>
+
+    <h2>Extract UTR from Image</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label>Upload Image:</label>
+        <input type="file" name="image">
+
+        <button type="submit">Extract UTR</button>
+    </form>
+{% endblock %}
+
+from fee.ocr import extract_utr_from_image
+
+utr = extract_utr_from_image("/path/to/receipt.jpg")

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Feedback{% endblock %}
+{% block content %}
+<style>
+.feedback-container {
+    max-width: 400px;
+    margin: 24px auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+.feedback-header {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #2a2a2a;
+    text-align: center;
+}
+.feedback-form textarea {
+    width: 100%;
+    min-height: 80px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    padding: 8px;
+    font-size: 1rem;
+}
+.feedback-btn {
+    width: 100%;
+    background: #0077b6;
+    color: #fff;
+    padding: 12px 0;
+    border: none;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.feedback-btn:hover {
+    background: #023e8a;
+}
+</style>
+<div class="feedback-container">
+    <div class="feedback-header">Submit Feedback</div>
+    <form method="post" class="feedback-form">
+        {% csrf_token %}
+        <textarea name="feedback" placeholder="Your feedback..." required></textarea>
+        <button type="submit" class="feedback-btn">Submit</button>
+    </form>
+</div>
+{% endblock %}

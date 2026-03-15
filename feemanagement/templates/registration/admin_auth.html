@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block title %}Admin Login / Sign Up{% endblock %}
+{% block content %}
+<style>
+.auth-container {
+    max-width: 400px;
+    margin: 2em auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px #0001;
+    overflow: hidden;
+}
+.auth-tabs {
+    display: flex;
+    cursor: pointer;
+    background: #f0f0f0;
+}
+.auth-tab {
+    flex: 1;
+    text-align: center;
+    padding: 1em;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+.auth-tab.active {
+    background: #fff;
+    border-bottom: 2px solid #e67e22;
+}
+.auth-form {
+    padding: 2em;
+    display: none;
+}
+.auth-form.active {
+    display: block;
+}
+.auth-form input {
+    width: 100%;
+    margin-bottom: 1em;
+    padding: 0.7em;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+.auth-form button {
+    width: 100%;
+    padding: 0.7em;
+    background: #e67e22;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+}
+</style>
+<div class="auth-container">
+    <div class="auth-tabs">
+        <div class="auth-tab active" id="adminLoginTab" onclick="showTab('adminLogin')">Login</div>
+        <div class="auth-tab" id="adminSignupTab" onclick="showTab('adminSignup')">Sign Up</div>
+    </div>
+    <div class="auth-form active" id="adminLoginForm">
+        <form method="post" action="{% url 'admin_login' %}">
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="Username or Email" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Login as Admin</button>
+        </form>
+    </div>
+    <div class="auth-form" id="adminSignupForm">
+        <form method="post" action="{% url 'admin_register' %}">
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <input type="password" name="password2" placeholder="Confirm Password" required>
+            <button type="submit">Sign Up as Admin</button>
+        </form>
+    </div>
+</div>
+<script>
+function showTab(tab) {
+    document.getElementById('adminLoginTab').classList.remove('active');
+    document.getElementById('adminSignupTab').classList.remove('active');
+    document.getElementById('adminLoginForm').classList.remove('active');
+    document.getElementById('adminSignupForm').classList.remove('active');
+    if (tab === 'adminLogin') {
+        document.getElementById('adminLoginTab').classList.add('active');
+        document.getElementById('adminLoginForm').classList.add('active');
+    } else {
+        document.getElementById('adminSignupTab').classList.add('active');
+        document.getElementById('adminSignupForm').classList.add('active');
+    }
+}
+</script>
+{% endblock %}

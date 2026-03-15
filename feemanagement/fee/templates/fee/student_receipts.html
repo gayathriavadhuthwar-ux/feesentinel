@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}My Receipts{% endblock %}
+
+{% block content %}
+    <style>
+        .receipts-container {
+            max-width: 600px;
+            margin: 24px auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 24px;
+        }
+        .receipts-header {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 18px;
+            color: #2a2a2a;
+            text-align: center;
+        }
+        .search-bar {
+            margin-bottom: 18px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .search-input {
+            flex: 1;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 1rem;
+        }
+        .search-btn {
+            background: #0077b6;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .receipt-card {
+            background: #fafafa;
+            border-radius: 8px;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+            margin-bottom: 18px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .receipt-label {
+            font-weight: 600;
+            color: #0077b6;
+            margin-right: 6px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #fff;
+        }
+        .badge-normal {
+            background: #38b000;
+        }
+        .badge-duplicate {
+            background: #d90429;
+        }
+        .view-link {
+            color: #0077b6;
+            font-weight: 500;
+            text-decoration: none;
+        }
+        .view-link:hover {
+            color: #023e8a;
+        }
+        .expand-text {
+            cursor: pointer;
+            color: #0077b6;
+            text-decoration: underline;
+        }
+        .extracted-popup {
+            display: none;
+            position: absolute;
+            background: #f1f3f4;
+            border-radius: 6px;
+            padding: 12px;
+            color: #333;
+            z-index: 10;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            max-width: 300px;
+        }
+        @media (max-width: 700px) {
+            .receipts-container {
+                max-width: 98vw;
+                padding: 8px;
+            }
+            .receipts-header {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+    </style>
+    <div class="receipts-container">
+        <div class="receipts-header">My Receipts</div>
+        <form class="search-bar" method="get">
+            <input class="search-input" type="text" name="search" placeholder="Search by UTR, Fee Type..." value="{{ request.GET.search|default:'' }}">
+            <button class="search-btn" type="submit">Search</button>
+        </form>
+        {% for receipt in receipts %}
+            <div class="receipt-card">
+                <div><span class="receipt-label">Fee Type:</span> {{ receipt.get_fee_type_display }}</div>
+                <div><span class="receipt-label">Submitted At:</span> {{ receipt.submitted_at }}</div>
+                <div><span class="receipt-label">Transaction Time:</span> {{ receipt.transaction_at }}</div>
+                <div><span class="receipt-label">UTR:</span> {{ receipt.utr }}</div>
+                <div><span class="receipt-label">Status:</span>
+                    {% if receipt.is_duplicate %}
+                        <span class="badge badge-duplicate">Duplicate</span>
+                    {% else %}s
+                        <span class="badge badge-normal">Normal</span>
+                    {% endif %}
+                </div>
+                <div><span class="receipt-label">Duplicate Of:</span> {% if receipt.duplicate_of %}{{ receipt.duplicate_of.student.username }}{% else %}—{% endif %}</div>
+                <div><span class="receipt-label">Image:</span> <a class="view-link" style="font-weight:600;" href="{% url 'receipt_detail' receipt.id %}">View</a></div>
+                <div><span class="receipt-label">Extracted Text:</span>
+                    <span class="expand-text" onclick="toggleExtracted(this)">{{ receipt.extracted_text|truncatechars:40 }}</span>
+                    <div class="extracted-popup">{{ receipt.extracted_text }}</div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <script>
+        function toggleExtracted(el) {
+            var popup = el.nextElementSibling;
+            if (popup.style.display === 'block') {
+                popup.style.display = 'none';
+            } else {
+                popup.style.display = 'block';
+            }
+        }
+        // Close popups when clicking outside
+        document.addEventListener('click', function(e) {
+            document.querySelectorAll('.extracted-popup').forEach(function(popup) {
+                if (!popup.contains(e.target) && popup.style.display === 'block' && !popup.previousElementSibling.contains(e.target)) {
+                    popup.style.display = 'none';
+                }
+            });
+        });
+    </script>
+{% endblock %}

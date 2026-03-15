@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+    <style>
+        .register-container {
+            max-width: 400px;
+            margin: 24px auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .register-header {
+            font-size: 1.7rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #2a2a2a;
+            text-align: center;
+        }
+        .register-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .register-form input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 1rem;
+        }
+        .register-btn {
+            width: 100%;
+            background: #0077b6;
+            color: #fff;
+            padding: 12px 0;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .register-btn:hover {
+            background: #023e8a;
+        }
+        @media (max-width: 600px) {
+            .register-container {
+                max-width: 98vw;
+                padding: 8px;
+            }
+            .register-header {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+    <div class="register-container">
+        <div class="register-header">Create an Account</div>
+        <form method="post" class="register-form">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="register-btn">Register</button>
+        </form>
+        <p style="text-align:center;">Already have an account? <a href="{% url 'login' %}">Log in</a></p>
+    </div>
+{% endblock %}

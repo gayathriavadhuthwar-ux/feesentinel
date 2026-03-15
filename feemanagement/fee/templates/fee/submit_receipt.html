@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block title %}Submit Receipt{% endblock %}
+
+{% block content %}
+    <style>
+        body {
+            background: #f5f6fa;
+        }
+        .submit-container {
+            max-width: 500px;
+            margin: 24px auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .submit-header {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 18px;
+            color: #2a2a2a;
+            text-align: center;
+        }
+        .student-details {
+            margin-bottom: 0;
+            padding: 12px;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+        }
+        .student-details strong {
+            color: #0077b6;
+        }
+        .form-group {
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        label {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 2px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 1rem;
+        }
+        .error-message {
+            color: #d90429;
+            font-size: 0.95rem;
+            margin-top: 2px;
+        }
+        .success-message {
+            color: #38b000;
+            font-size: 1rem;
+            margin-top: 2px;
+        }
+        .submit-btn {
+            width: 100%;
+            background: #0077b6;
+            color: #fff;
+            padding: 12px 0;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .submit-btn:hover {
+            background: #023e8a;
+        }
+        @media (max-width: 600px) {
+            .submit-container {
+                max-width: 98vw;
+                padding: 8px;
+            }
+            .submit-header {
+                font-size: 1.3rem;
+            }
+            .student-details {
+                padding: 8px;
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+    <div class="submit-container">
+        <div class="submit-header">Submit Fee Receipt</div>
+        {% if student_details %}
+            <div class="student-details">
+                <strong>Student Details:</strong><br>
+                Username: {{ student_details.username }}<br>
+                Email: {{ student_details.email }}<br>
+                Hallticket Number: {{ student_details.hallticket_number }}
+            </div>
+        {% endif %}
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_fee_type">Fee Type:</label>
+                {{ form.fee_type }}
+                {% if form.fee_type.errors %}
+                    <div class="error-message">{{ form.fee_type.errors|striptags }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="id_hallticket_number">Hallticket Number:</label>
+                {{ form.hallticket_number }}
+                {% if form.hallticket_number.errors %}
+                    <div class="error-message">{{ form.hallticket_number.errors|striptags }}</div>
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="id_image">Receipt Image:</label>
+                {{ form.image }}
+                {% if form.image.errors %}
+                    <div class="error-message">{{ form.image.errors|striptags }}</div>
+                {% endif %}
+            </div>
+            <button type="submit" class="submit-btn">Submit</button>
+        </form>
+    </div>
+{% endblock %}

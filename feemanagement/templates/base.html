@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>{% block title %}Fee Management{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f5f6fa;
+        }
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: #0077b6;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .navbar nav {
+            display: flex;
+            gap: 18px;
+            padding: 12px 0;
+        }
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.1rem;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .navbar a:hover {
+            background: #023e8a;
+        }
+        main {
+            margin-top: 60px;
+            padding: 16px;
+        }
+        .messages {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 18px;
+        }
+        .messages li {
+            background: #fff3cd;
+            color: #856404;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+        @media (max-width: 600px) {
+            .navbar nav {
+                gap: 8px;
+                padding: 8px 0;
+            }
+            .navbar a {
+                font-size: 1rem;
+                padding: 6px 8px;
+            }
+            main {
+                margin-top: 52px;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="{% url 'home' %}">Home</a>
+            {% if user.is_authenticated %}
+                {% if user.is_superuser %}
+                    <a href="{% url 'admin_receipts' %}">Admin Receipts</a>
+                {% else %}
+                    <a href="{% url 'submit_receipt' %}">Submit Receipt</a>
+                    <a href="{% url 'student_receipts' %}">My Receipts</a>
+                {% endif %}
+                <a href="{% url 'logout' %}">Logout</a>
+            {% else %}
+                <a href="{% url 'student_auth' %}">Student Login/Sign Up</a>
+                <a href="{% url 'admin_auth' %}">Admin Login/Sign Up</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main>
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}Receipt Details{% endblock %}
+
+{% block content %}
+    <style>
+        body {
+            background: #f5f6fa;
+        }
+        .receipt-container {
+            max-width: 500px;
+            margin: 24px auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .receipt-header {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 18px;
+            color: #70466d;
+            text-align: center;
+        }
+        .receipt-details {
+            font-size: 1.1rem;
+            margin-bottom: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .receipt-details strong {
+            color: #0077b6;
+        }
+        .receipt-section {
+            margin-bottom: 0;
+        }
+        .receipt-image-link {
+            display: inline-block;
+            background: #0077b6;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            margin-top: 8px;
+        }
+        .receipt-image-link:hover {
+            background: #023e8a;
+        }
+        .extracted-text {
+            background: #f1f3f4;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 1rem;
+            color: #333;
+            margin-bottom: 0;
+            white-space: pre-wrap;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 18px;
+            color: #0077b6;
+            font-weight: 500;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            color: #023e8a;
+        }
+        @media (max-width: 600px) {
+            .receipt-container {
+                max-width: 98vw;
+                padding: 8px;
+            }
+            .receipt-header {
+                font-size: 1.3rem;
+            }
+            .receipt-details {
+                font-size: 0.95rem;
+                gap: 6px;
+            }
+            .extracted-text {
+                padding: 8px;
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+    <div class="receipt-container">
+        <div class="receipt-header">Receipt Details</div>
+        <div class="receipt-details receipt-section">
+            <div><strong>Student:</strong> {{ receipt.student.username }}</div>
+            <div><strong>Fee Type:</strong> {{ receipt.get_fee_type_display }}</div>
+            <div><strong>Submitted At:</strong> {{ receipt.submitted_at }}</div>
+            <div><strong>Transaction Time:</strong> {{ receipt.transaction_at }}</div>
+            <div><strong>UTR:</strong> {{ receipt.utr }}</div>
+            <div><strong>Duplicate:</strong> {% if receipt.is_duplicate %}Yes{% else %}No{% endif %}</div>
+            {% if receipt.duplicate_of %}
+                <div><strong>Duplicate of:</strong> {{ receipt.duplicate_of.student.username }} (Receipt #{{ receipt.duplicate_of.id }})</div>
+            {% endif %}
+        </div>
+        <div class="receipt-section">
+            <strong>Receipt Image:</strong> <a class="receipt-image-link" href="{{ receipt.image.url }}" target="_blank">View image</a>
+        </div>
+        <div class="receipt-section">
+            <strong>Extracted Text</strong>
+            <div class="extracted-text">{{ receipt.extracted_text }}</div>
+        </div>
+        <a class="back-link" href="{% url 'student_receipts' %}">Back to my receipts</a>
+    </div>
+{% endblock %}
