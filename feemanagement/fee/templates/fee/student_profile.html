@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<style>
+    .profile-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .profile-hero {
+        position: relative;
+        background: linear-gradient(135deg, rgba(14, 165, 233, 0.2) 0%, rgba(99, 102, 241, 0.2) 100%);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 64px 48px;
+        border-radius: 40px;
+        color: white;
+        overflow: hidden;
+        margin-bottom: 40px;
+    }
+
+    .profile-hero::before {
+        content: '';
+        position: absolute;
+        top: -100px;
+        right: -100px;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, var(--primary-glow), transparent 70%);
+        z-index: -1;
+    }
+
+    .profile-avatar-large {
+        width: 140px;
+        height: 140px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        border-radius: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        font-weight: 800;
+        box-shadow: 0 20px 40px -10px var(--primary-glow);
+        border: 4px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .hero-text h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+        background: linear-gradient(to right, #fff, #94a3b8);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.04em;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+        margin-bottom: 40px;
+    }
+
+    .card-premium {
+        padding: 32px;
+        border-radius: 32px;
+        transition: var(--transition);
+    }
+
+    .card-premium:hover {
+        transform: translateY(-8px);
+        background: rgba(30, 41, 59, 0.6);
+        border-color: var(--primary);
+    }
+
+    .card-premium h3 {
+        font-size: 1.3rem;
+        margin-bottom: 24px;
+        color: var(--primary);
+        font-weight: 700;
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 16px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .info-row:last-child { border-bottom: none; }
+
+    .label-premium {
+        color: var(--text-muted);
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .value-premium {
+        color: #fff;
+        font-weight: 700;
+    }
+
+    .history-section {
+        padding: 40px;
+        border-radius: 40px;
+    }
+
+    .history-section h3 {
+        font-size: 1.8rem;
+        margin-bottom: 32px;
+        font-weight: 800;
+    }
+
+    .receipt-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 24px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 24px;
+        margin-bottom: 16px;
+        transition: var(--transition);
+        border: 1px solid transparent;
+    }
+
+    .receipt-item:hover {
+        background: rgba(255, 255, 255, 0.07);
+        border-color: var(--primary-glow);
+        transform: translateX(8px);
+    }
+
+    .download-btn {
+        padding: 12px 24px;
+        background: var(--primary);
+        color: #fff;
+        border-radius: 14px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: var(--transition);
+    }
+
+    .download-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px -5px var(--primary-glow);
+    }
+
+    @media (max-width: 768px) {
+        .profile-hero { padding: 40px 24px; text-align: center; }
+        .profile-hero-content { flex-direction: column; gap: 24px; }
+        .hero-text h1 { font-size: 2.2rem; }
+    }
+</style>
+
+<div class="profile-container">
+    <div class="profile-hero">
+        <div class="profile-hero-content">
+            <div class="profile-avatar-large shadow">
+                {{ user.username|slice:":1"|upper }}
+            </div>
+            <div class="hero-text">
+                <h1>{{ user.username }}</h1>
+                <p>🎓 Student Identification Management</p>
+                <div style="margin-top: 15px; font-size: 0.9rem; opacity: 0.8;">
+                    Member since {{ user.date_joined|date:"F Y" }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="profile-card-premium glass">
+            <h3>👤 Personal Profile</h3>
+            <div class="info-row">
+                <span class="info-label-premium">HT Number</span>
+                <span class="info-value-premium">{{ profile.hallticket_number }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label-premium">Branch</span>
+                <span class="info-value-premium">{{ profile.get_branch_display|default:"N/A" }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label-premium">Email</span>
+                <span class="info-value-premium" style="font-size: 0.8rem;">{{ user.email }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label-premium">Status</span>
+                <span class="info-value-premium" style="color: var(--success);">Active</span>
+            </div>
+        </div>
+
+        <div class="profile-card-premium glass">
+            <h3>📊 Payment activity</h3>
+            <div class="info-row">
+                <span class="info-label-premium">Verified Payments</span>
+                <span class="info-value-premium" style="color: var(--success);">{{ total_paid }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label-premium">Under Review</span>
+                <span class="info-value-premium" style="color: var(--warning);">{{ pending_receipts.count }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label-premium">Efficiency Score</span>
+                <span class="info-value-premium">98%</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="history-card glass">
+        <h3>📄 Approved Receipts History</h3>
+        
+        <div class="history-table">
+            {% for r in approved_receipts %}
+                <div class="receipt-row">
+                    <div class="receipt-info">
+                        <h4>{{ r.get_fee_type_display }}</h4>
+                        <div class="receipt-meta">
+                            <span>🆔 {{ r.utr }}</span> • <span>📅 {{ r.processed_at|date:"M d, Y" }}</span>
+                        </div>
+                    </div>
+                    <a href="{% url 'download_receipt_pdf' r.id %}" class="btn-download-premium">
+                        Download PDF ⬇️
+                    </a>
+                </div>
+            {% empty %}
+                <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                    <div style="font-size: 3rem; margin-bottom: 10px;">📂</div>
+                    <p>Your approved receipts will appear here.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

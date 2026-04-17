@@ -1,0 +1,8 @@
+{
+    "python.defaultInterpreterPath": "c:\\Users\\GAYATHRI\\OneDrive\\Documents\\te\\project\\env\\Scripts\\python.exe",
+    "python.interpreterPath": "c:\\Users\\GAYATHRI\\OneDrive\\Documents\\te\\project\\env\\Scripts\\python.exe",
+    "python.analysis.extraPaths": [
+        "../",
+        "../fee"
+    ]
+}

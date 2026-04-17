@@ -1,0 +1,9 @@
+[MASTER]
+load-plugins=pylint_django
+
+[MESSAGES CONTROL]
+# Disable some common warnings that might be noisy
+disable=C0114,C0115,C0116,C0301,R0903,R0912,R0913,R0914,R0915,W0718,W0611
+
+[MISCELLANEOUS]
+notes=FIXME,XXX,TODO
