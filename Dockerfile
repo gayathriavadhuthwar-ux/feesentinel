@@ -39,5 +39,5 @@ RUN python manage.py collectstatic --noinput
 # Expose the port the app runs on
 EXPOSE 8000
 
-# Run the project using Gunicorn
-CMD ["gunicorn", "feemanagement.wsgi:application", "--bind", "0.0.0.0:8000"]
+# Run migrations and then start the project using Gunicorn
+CMD ["sh", "-c", "python manage.py migrate && gunicorn feemanagement.wsgi:application --bind 0.0.0.0:8000"]
