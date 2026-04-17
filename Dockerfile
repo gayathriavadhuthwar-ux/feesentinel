@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     pkg-config \
     default-libmysqlclient-dev \
+    libcairo2-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory in the container
