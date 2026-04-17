@@ -3,137 +3,267 @@
 {% block title %}My Receipts{% endblock %}
 
 {% block content %}
-    <style>
-        .receipts-container {
-            max-width: 600px;
-            margin: 24px auto;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-            padding: 24px;
-        }
-        .receipts-header {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 18px;
-            color: #2a2a2a;
-            text-align: center;
-        }
-        .search-bar {
-            margin-bottom: 18px;
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .search-input {
-            flex: 1;
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid #ddd;
-            font-size: 1rem;
-        }
-        .search-btn {
-            background: #0077b6;
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            padding: 8px 16px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .receipt-card {
-            background: #fafafa;
-            border-radius: 8px;
-            box-shadow: 0 1px 6px rgba(0,0,0,0.07);
-            margin-bottom: 18px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .receipt-label {
-            font-weight: 600;
-            color: #0077b6;
-            margin-right: 6px;
-        }
-        .badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #fff;
-        }
-        .badge-normal {
-            background: #38b000;
-        }
-        .badge-duplicate {
-            background: #d90429;
-        }
-        .view-link {
-            color: #0077b6;
-            font-weight: 500;
-            text-decoration: none;
-        }
-        .view-link:hover {
-            color: #023e8a;
-        }
-        .expand-text {
-            cursor: pointer;
-            color: #0077b6;
-            text-decoration: underline;
-        }
-        .extracted-popup {
-            display: none;
-            position: absolute;
-            background: #f1f3f4;
-            border-radius: 6px;
-            padding: 12px;
-            color: #333;
-            z-index: 10;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-            max-width: 300px;
-        }
-        @media (max-width: 700px) {
-            .receipts-container {
-                max-width: 98vw;
-                padding: 8px;
-            }
-            .receipts-header {
-                font-size: 1.3rem;
-            }
-        }
-    </style>
-    </style>
-    <div class="receipts-container">
-        <div class="receipts-header">My Receipts</div>
-        <form class="search-bar" method="get">
-            <input class="search-input" type="text" name="search" placeholder="Search by UTR, Fee Type..." value="{{ request.GET.search|default:'' }}">
-            <button class="search-btn" type="submit">Search</button>
+<style>
+    .receipts-page-container {
+        max-width: 800px;
+        margin: 0 auto;
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, var(--text-main), var(--primary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 32px;
+        text-align: center;
+    }
+
+    .search-glass {
+        padding: 24px;
+        border-radius: 20px;
+        margin-bottom: 32px;
+    }
+
+    .search-flex {
+        display: flex;
+        gap: 12px;
+    }
+
+    .search-input-premium {
+        flex: 1;
+        padding: 14px 20px;
+        border-radius: 14px;
+        border: 2px solid transparent;
+        background: rgba(255, 255, 255, 0.8);
+        font-family: inherit;
+        font-size: 1rem;
+        transition: var(--transition);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .search-input-premium:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: white;
+        box-shadow: 0 0 0 4px var(--primary-glow);
+    }
+
+    .btn-search-p {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 0 24px;
+        border-radius: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .btn-search-p:hover {
+        filter: brightness(1.1);
+        transform: translateY(-2px);
+    }
+
+    .student-receipt-card {
+        padding: 24px;
+        border-radius: 24px;
+        margin-bottom: 20px;
+        transition: var(--transition);
+    }
+
+    .student-receipt-card:hover {
+        transform: scale(1.02);
+        box-shadow: var(--shadow-md);
+    }
+
+    .receipt-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .receipt-type {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+
+    .badge-premium {
+        padding: 6px 12px;
+        border-radius: 10px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .badge-pending { background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
+    .badge-approved { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+    .badge-rejected { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
+    .badge-duplicate { background: rgba(99, 102, 241, 0.1); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.2); }
+
+    .duplicate-warning {
+        margin-top: 16px;
+        padding: 14px 20px;
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05));
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 16px;
+        color: #f87171;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.9rem;
+        animation: pulseSubtle 2s infinite;
+    }
+
+    @keyframes pulseSubtle {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.01); opacity: 0.9; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .receipt-content-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 16px;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .info-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .info-value {
+        font-weight: 600;
+        color: var(--text-main);
+        font-size: 0.95rem;
+    }
+
+    .action-row {
+        margin-top: 20px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(0,0,0,0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .btn-download-premium {
+        background: var(--primary);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: var(--transition);
+    }
+
+    .btn-download-premium:hover {
+        filter: brightness(1.1);
+        transform: translateY(-2px);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+<div class="receipts-page-container">
+    <h1 class="page-title">My Payment History</h1>
+
+    <div class="search-glass glass">
+        <form class="search-flex" method="get">
+            <input class="search-input-premium" type="text" name="search" placeholder="Search by UTR ID, category or status..." value="{{ request.GET.search|default:'' }}">
+            <button class="btn-search-p" type="submit">Search</button>
         </form>
-        {% for receipt in receipts %}
-            <div class="receipt-card">
-                <div><span class="receipt-label">Fee Type:</span> {{ receipt.get_fee_type_display }}</div>
-                <div><span class="receipt-label">Submitted At:</span> {{ receipt.submitted_at }}</div>
-                <div><span class="receipt-label">Transaction Time:</span> {{ receipt.transaction_at }}</div>
-                <div><span class="receipt-label">UTR:</span> {{ receipt.utr }}</div>
-                <div><span class="receipt-label">Status:</span>
+    </div>
+
+    {% for receipt in receipts %}
+        <div class="student-receipt-card glass">
+            <div class="receipt-header-row">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span class="receipt-type">{{ receipt.get_fee_type_display }}</span>
                     {% if receipt.is_duplicate %}
-                        <span class="badge badge-duplicate">Duplicate</span>
-                    {% else %}s
-                        <span class="badge badge-normal">Normal</span>
+                        <span class="badge-premium badge-duplicate">Potential Duplicate</span>
                     {% endif %}
                 </div>
-                <div><span class="receipt-label">Duplicate Of:</span> {% if receipt.duplicate_of %}{{ receipt.duplicate_of.student.username }}{% else %}—{% endif %}</div>
-                <div><span class="receipt-label">Image:</span> <a class="view-link" style="font-weight:600;" href="{% url 'receipt_detail' receipt.id %}">View</a></div>
-                <div><span class="receipt-label">Extracted Text:</span>
-                    <span class="expand-text" onclick="toggleExtracted(this)">{{ receipt.extracted_text|truncatechars:40 }}</span>
-                    <div class="extracted-popup">{{ receipt.extracted_text }}</div>
-                </div>
+                <span class="badge-premium badge-{{ receipt.status }}">
+                    {{ receipt.get_status_display }}
+                </span>
             </div>
-        {% endfor %}
-    </div>
+
+            <div class="receipt-content-grid">
+                <div class="info-item">
+                    <span class="info-label">Submission Date</span>
+                    <span class="info-value">{{ receipt.submitted_at|date:"M d, Y" }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">UTR ID</span>
+                    <span class="info-value" style="font-family: monospace;">{{ receipt.utr|default:"Processing..." }}</span>
+                </div>
+                {% if receipt.transaction_at %}
+                <div class="info-item">
+                    <span class="info-label">Transaction Date</span>
+                    <span class="info-value">{{ receipt.transaction_at|date:"M d, Y" }}</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="action-row">
+                <a class="view-link" href="{% url 'receipt_detail' receipt.id %}" style="font-weight: 700; color: var(--primary); text-decoration: none;">
+                    Review Request Details ➔
+                </a>
+                
+                {% if receipt.status == 'approved' %}
+                    <a href="{% url 'download_receipt_pdf' receipt.id %}" class="btn-download-premium">
+                        Download PDF 📄
+                    </a>
+                {% endif %}
+            </div>
+
+            {% if receipt.is_duplicate or receipt.status == 'rejected' and 'duplicate' in receipt.rejection_reason|lower %}
+                <div class="duplicate-warning" style="align-items: flex-start;">
+                    <span style="font-size: 1.2rem;">⚠️</span>
+                    <div>
+                        <div style="margin-bottom: 4px;">Duplicate receipt submitted - Verification failed</div>
+                        {% if receipt.duplicate_of %}
+                            <div style="font-size: 0.8rem; font-weight: normal; color: #fca5a5;">
+                                This receipt was already submitted by <strong style="color: #f87171;">@{{ receipt.duplicate_of.student.username }}</strong>.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if receipt.status == 'rejected' and receipt.rejection_reason %}
+                <div style="margin-top: 16px; padding: 12px; background: rgba(239, 68, 68, 0.1); border-radius: 12px; border-left: 3px solid var(--danger);">
+                    <span class="info-label" style="color: var(--danger); margin-bottom: 4px; display: block;">Rejection Feedback</span>
+                    <p style="color: #f87171; font-size: 0.9rem; font-weight: 600;">{{ receipt.rejection_reason }}</p>
+                </div>
+            {% endif %}
+        </div>
+    {% empty %}
+        <div style="text-align: center; padding: 60px; color: var(--text-muted);">
+            <div style="font-size: 4rem; margin-bottom: 20px;">📜</div>
+            <p style="font-size: 1.1rem; font-weight: 500;">No payment records found.</p>
+        </div>
+    {% endfor %}
+</div>
     <script>
         function toggleExtracted(el) {
             var popup = el.nextElementSibling;

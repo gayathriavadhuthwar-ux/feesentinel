@@ -4,68 +4,89 @@
 
 {% block content %}
     <style>
-        .login-container {
-            max-width: 400px;
-            margin: 24px auto;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
+        .auth-container {
+            max-width: 450px;
+            margin: 60px auto;
+            padding: 48px;
+            border-radius: 32px;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: slideUp 0.6s ease-out;
         }
-        .login-header {
-            font-size: 1.7rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-            color: #2a2a2a;
+        .auth-header {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 32px;
             text-align: center;
+            background: linear-gradient(135deg, #fff, var(--text-muted));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        .login-form {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+        .form-group {
+            margin-bottom: 24px;
         }
-        .login-form input {
-            width: 100%;
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid #ddd;
-            font-size: 1rem;
-        }
-        .login-btn {
-            width: 100%;
-            background: #0077b6;
-            color: #fff;
-            padding: 12px 0;
-            border: none;
-            border-radius: 6px;
-            font-size: 1.1rem;
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
             font-weight: 600;
-            margin-top: 10px;
+        }
+        .auth-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            border: none;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.1rem;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: var(--transition);
+            margin-top: 12px;
         }
-        .login-btn:hover {
-            background: #023e8a;
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
         }
-        @media (max-width: 600px) {
-            .login-container {
-                max-width: 98vw;
-                padding: 8px;
-            }
-            .login-header {
-                font-size: 1.2rem;
-            }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
-    <div class="login-container">
-        <div class="login-header">Login</div>
-        <form method="post" class="login-form">
+
+    <div class="auth-container glass">
+        <h2 class="auth-header">Login</h2>
+        <form method="post">
             {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="login-btn">Login</button>
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    <div class="{% if field.field.widget.input_type == 'password' %}password-wrapper{% endif %}">
+                        {{ field }}
+                        {% if field.field.widget.input_type == 'password' %}
+                            <button type="button" class="toggle-password" onclick="togglePassword('{{ field.id_for_label }}', this)">
+                                <i data-lucide="eye"></i>
+                            </button>
+                        {% endif %}
+                    </div>
+                    {% if field.errors %}
+                        <div class="error-text" style="color: #f87171; font-size: 0.9rem; margin-top: 4px;">{{ field.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 24px;">
+                <a href="{% url 'password_reset' %}" class="forgot-password-link" style="color: #60a5fa; text-decoration: none; font-size: 0.9rem; font-weight: 600; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: rgba(96, 165, 250, 0.1); border-radius: 8px;">
+                    <i data-lucide="key" style="width: 14px; height: 14px;"></i>
+                    Forgot Password?
+                </a>
+            </div>
+
+            <button type="submit" class="auth-btn">Login</button>
         </form>
+        <p style="text-align: center; margin-top: 24px; color: var(--text-muted);">
+            Don't have an account? <a href="{% url 'register' %}" style="color: var(--primary); text-decoration: none; font-weight: 600;">Sign Up</a>
+        </p>
     </div>
 {% endblock %}

@@ -1,0 +1,39 @@
+services:
+  # Web Service
+  - type: web
+    name: fee-management
+    runtime: docker
+    plan: free # or starter
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: PROD_ENV
+        value: "True"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: fee-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4
+      # Cloudinary Config (User will need to set these in Render dashboard)
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      # Email Config (Optional)
+      - key: EMAIL_HOST
+        sync: false
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+
+databases:
+  - name: fee-db
+    plan: free
+    databaseName: feemanagement
+    user: admin

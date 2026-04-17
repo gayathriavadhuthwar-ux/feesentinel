@@ -2,92 +2,203 @@
 {% block title %}Admin Login / Sign Up{% endblock %}
 {% block content %}
 <style>
-.auth-container {
-    max-width: 400px;
-    margin: 2em auto;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 12px #0001;
-    overflow: hidden;
-}
-.auth-tabs {
-    display: flex;
-    cursor: pointer;
-    background: #f0f0f0;
-}
-.auth-tab {
-    flex: 1;
-    text-align: center;
-    padding: 1em;
-    font-weight: bold;
-    transition: background 0.2s;
-}
-.auth-tab.active {
-    background: #fff;
-    border-bottom: 2px solid #e67e22;
-}
-.auth-form {
-    padding: 2em;
-    display: none;
-}
-.auth-form.active {
-    display: block;
-}
-.auth-form input {
-    width: 100%;
-    margin-bottom: 1em;
-    padding: 0.7em;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-.auth-form button {
-    width: 100%;
-    padding: 0.7em;
-    background: #e67e22;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    font-size: 1em;
-    cursor: pointer;
-}
+    .auth-container {
+        max-width: 550px;
+        margin: 60px auto;
+        padding: 64px;
+        border-radius: 40px;
+        animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .auth-tabs {
+        display: flex;
+        gap: 12px;
+        background: rgba(0, 0, 0, 0.3);
+        padding: 8px;
+        border-radius: 20px;
+        margin-bottom: 48px;
+    }
+
+    .auth-tab {
+        flex: 1;
+        padding: 14px;
+        text-align: center;
+        cursor: pointer;
+        border-radius: 16px;
+        font-weight: 700;
+        transition: var(--transition);
+        color: var(--text-muted);
+        font-size: 1.1rem;
+    }
+
+    .auth-tab.active {
+        background: var(--primary);
+        color: #fff;
+        box-shadow: 0 8px 16px var(--primary-glow);
+    }
+
+    .auth-section {
+        display: none;
+    }
+
+    .auth-section.active {
+        display: block;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    .form-group {
+        margin-bottom: 28px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 12px;
+        color: var(--text-muted);
+        font-size: 1.05rem;
+        font-weight: 600;
+        margin-left: 4px;
+    }
+
+    .auth-btn {
+        width: 100%;
+        padding: 22px;
+        border-radius: 20px;
+        border: none;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: #fff;
+        font-weight: 800;
+        font-size: 1.25rem;
+        cursor: pointer;
+        transition: var(--transition);
+        margin-top: 24px;
+        box-shadow: 0 12px 20px -5px var(--primary-glow);
+        display: block;
+        text-align: center;
+        text-decoration: none;
+    }
+
+    .auth-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 25px -5px var(--primary-glow);
+        filter: brightness(1.1);
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .auth-container {
+            padding: 40px 24px;
+            margin: 20px 16px;
+            border-radius: 32px;
+        }
+
+        .auth-btn {
+            padding: 18px;
+            font-size: 1.1rem;
+        }
+    }
 </style>
-<div class="auth-container">
+
+<div class="auth-container glass">
     <div class="auth-tabs">
-        <div class="auth-tab active" id="adminLoginTab" onclick="showTab('adminLogin')">Login</div>
-        <div class="auth-tab" id="adminSignupTab" onclick="showTab('adminSignup')">Sign Up</div>
+        <div class="auth-tab active" onclick="switchTab('login')">Login</div>
+        <div class="auth-tab" onclick="switchTab('signup')">Sign Up</div>
     </div>
-    <div class="auth-form active" id="adminLoginForm">
-        <form method="post" action="{% url 'admin_login' %}">
+
+    <!-- Login Section -->
+    <div id="login-section" class="auth-section active">
+        <form method="post">
             {% csrf_token %}
-            <input type="text" name="username" placeholder="Username or Email" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <button type="submit">Login as Admin</button>
+            <input type="hidden" name="action" value="login">
+            {% for field in login_form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                <div class="{% if field.field.widget.input_type == 'password' %}password-wrapper{% endif %}">
+                    {{ field }}
+                    {% if field.field.widget.input_type == 'password' %}
+                    <button type="button" class="toggle-password"
+                        onclick="togglePassword('{{ field.id_for_label }}', this)">
+                        <i data-lucide="eye"></i>
+                    </button>
+                    {% endif %}
+                </div>
+                {% if field.errors %}
+                <div class="error-text" style="color: #f87171; font-size: 0.9rem; margin-top: 4px;">{{
+                    field.errors|striptags }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <div style="text-align: right; margin-bottom: 24px;">
+                <a href="{% url 'password_reset' %}" class="forgot-password-link">Forgot Password?</a>
+            </div>
+            <button type="submit" class="auth-btn">Admin Login</button>
         </form>
     </div>
-    <div class="auth-form" id="adminSignupForm">
-        <form method="post" action="{% url 'admin_register' %}">
+
+    <!-- Signup Section -->
+    <div id="signup-section" class="auth-section">
+        <form method="post">
             {% csrf_token %}
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="email" name="email" placeholder="Email" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <input type="password" name="password2" placeholder="Confirm Password" required>
-            <button type="submit">Sign Up as Admin</button>
+            <input type="hidden" name="action" value="signup">
+            {% for field in signup_form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                <div class="{% if field.field.widget.input_type == 'password' %}password-wrapper{% endif %}">
+                    {{ field }}
+                    {% if field.field.widget.input_type == 'password' %}
+                    <button type="button" class="toggle-password"
+                        onclick="togglePassword('{{ field.id_for_label }}', this)">
+                        <i data-lucide="eye"></i>
+                    </button>
+                    {% endif %}
+                </div>
+                {% if field.errors %}
+                <div class="error-text" style="color: #f87171; font-size: 0.9rem; margin-top: 4px;">{{
+                    field.errors|striptags }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <button type="submit" class="auth-btn">Create Admin Account</button>
         </form>
     </div>
 </div>
+
 <script>
-function showTab(tab) {
-    document.getElementById('adminLoginTab').classList.remove('active');
-    document.getElementById('adminSignupTab').classList.remove('active');
-    document.getElementById('adminLoginForm').classList.remove('active');
-    document.getElementById('adminSignupForm').classList.remove('active');
-    if (tab === 'adminLogin') {
-        document.getElementById('adminLoginTab').classList.add('active');
-        document.getElementById('adminLoginForm').classList.add('active');
-    } else {
-        document.getElementById('adminSignupTab').classList.add('active');
-        document.getElementById('adminSignupForm').classList.add('active');
+    function switchTab(tab) {
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.auth-section').forEach(s => s.classList.remove('active'));
+
+        if (tab === 'login') {
+            document.querySelector('.auth-tab:nth-child(1)').classList.add('active');
+            document.getElementById('login-section').classList.add('active');
+        } else {
+            document.querySelector('.auth-tab:nth-child(2)').classList.add('active');
+            document.getElementById('signup-section').classList.add('active');
+        }
     }
-}
 </script>
+
 {% endblock %}

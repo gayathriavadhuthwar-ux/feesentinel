@@ -1,134 +1,450 @@
 {% extends 'base.html' %}
 
-{% block title %}Submit Receipt{% endblock %}
+{% block title %}Submit Receipt - Proof of Payment{% endblock %}
 
 {% block content %}
-    <style>
-        body {
-            background: #f5f6fa;
-        }
-        .submit-container {
-            max-width: 500px;
-            margin: 24px auto;
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-        }
-        .submit-header {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 18px;
-            color: #2a2a2a;
-            text-align: center;
-        }
-        .student-details {
-            margin-bottom: 0;
-            padding: 12px;
-            border: 1px solid #ccc;
-            background: #f9f9f9;
-            border-radius: 8px;
-            font-size: 1rem;
-            box-shadow: 0 1px 6px rgba(0,0,0,0.07);
-        }
-        .student-details strong {
-            color: #0077b6;
-        }
-        .form-group {
-            margin-bottom: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        label {
-            font-weight: 500;
-            color: #333;
-            margin-bottom: 2px;
-        }
-        input, select {
-            width: 100%;
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid #ddd;
-            font-size: 1rem;
-        }
-        .error-message {
-            color: #d90429;
-            font-size: 0.95rem;
-            margin-top: 2px;
-        }
-        .success-message {
-            color: #38b000;
-            font-size: 1rem;
-            margin-top: 2px;
-        }
-        .submit-btn {
-            width: 100%;
-            background: #0077b6;
-            color: #fff;
-            padding: 12px 0;
-            border: none;
-            border-radius: 6px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-top: 10px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .submit-btn:hover {
-            background: #023e8a;
-        }
+<style>
+    .submit-wrapper {
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 48px;
+        border-radius: 40px;
+        animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .submit-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .submit-header h1 {
+        font-size: 2.8rem;
+        font-weight: 800;
+        margin-bottom: 8px;
+        background: linear-gradient(to right, #fff, var(--primary));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.04em;
+    }
+
+    .student-badge {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 16px 24px;
+        border-radius: 20px;
+        margin-bottom: 40px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .form-group {
+        margin-bottom: 28px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 10px;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-left: 4px;
+    }
+
+    /* Redundant local styles removed - now handled globally in base.html */
+
+    select.control-premium {
+        appearance: none;
+        cursor: pointer;
+        padding-right: 40px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 16px center;
+        background-size: 16px;
+    }
+
+    .file-upload-box {
+        position: relative;
+        padding: 32px;
+        background: rgba(14, 165, 233, 0.05);
+        border: 2px dashed rgba(14, 165, 233, 0.2);
+        border-radius: 20px;
+        text-align: center;
+        transition: var(--transition);
+        cursor: pointer;
+    }
+
+    .file-upload-box:hover {
+        background: rgba(14, 165, 233, 0.1);
+        border-color: var(--primary);
+    }
+
+    .submit-btn-premium {
+        width: 100%;
+        padding: 18px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: #fff;
+        border: none;
+        border-radius: 18px;
+        font-weight: 800;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: var(--transition);
+        margin-top: 16px;
+    }
+
+    .submit-btn-premium:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 15px 30px -5px var(--primary-glow);
+    }
+
+    .error-inline {
+        color: #ef4444;
+        font-size: 0.85rem;
+        margin-top: 8px;
+        display: block;
+    }
+
         @media (max-width: 600px) {
-            .submit-container {
-                max-width: 98vw;
-                padding: 8px;
+            .submit-wrapper {
+                padding: 32px 24px;
+                margin: 20px auto;
             }
-            .submit-header {
-                font-size: 1.3rem;
-            }
-            .student-details {
-                padding: 8px;
-                font-size: 0.95rem;
-            }
+            .submit-header h1 { font-size: 2rem; }
+        }
+
+        /* Progress Stepper */
+        .stepper {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        .stepper::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 0;
+        }
+        .step {
+            width: 32px;
+            height: 32px;
+            background: var(--bg-glass);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            z-index: 1;
+            transition: var(--transition);
+        }
+        .step.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+        .step.completed {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        #image-preview {
+            display: none;
+            max-width: 100%;
+            margin-top: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Processing Overlay */
+        #processing-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 15, 28, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+        }
+        
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--border-glass);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 24px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .shimmer-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            background: linear-gradient(90deg, #94a3b8, #fff, #94a3b8);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
         }
     </style>
-    <div class="submit-container">
-        <div class="submit-header">Submit Fee Receipt</div>
-        {% if student_details %}
-            <div class="student-details">
-                <strong>Student Details:</strong><br>
-                Username: {{ student_details.username }}<br>
-                Email: {{ student_details.email }}<br>
-                Hallticket Number: {{ student_details.hallticket_number }}
-            </div>
-        {% endif %}
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="id_fee_type">Fee Type:</label>
-                {{ form.fee_type }}
-                {% if form.fee_type.errors %}
-                    <div class="error-message">{{ form.fee_type.errors|striptags }}</div>
-                {% endif %}
-            </div>
-            <div class="form-group">
-                <label for="id_hallticket_number">Hallticket Number:</label>
-                {{ form.hallticket_number }}
-                {% if form.hallticket_number.errors %}
-                    <div class="error-message">{{ form.hallticket_number.errors|striptags }}</div>
-                {% endif %}
-            </div>
-            <div class="form-group">
-                <label for="id_image">Receipt Image:</label>
-                {{ form.image }}
-                {% if form.image.errors %}
-                    <div class="error-message">{{ form.image.errors|striptags }}</div>
-                {% endif %}
-            </div>
-            <button type="submit" class="submit-btn">Submit</button>
-        </form>
+
+<div id="processing-overlay">
+    <div class="spinner"></div>
+    <p class="shimmer-text">AI is processing your receipt...</p>
+    <p style="color: var(--text-muted); margin-top: 10px;">Extracting Transaction ID, Amount, and details</p>
+</div>
+
+<div class="submit-wrapper glass">
+    <div class="submit-header">
+        <h1>Submit Receipt</h1>
+        <p style="color: var(--text-muted);">Securely upload your payment proof for verification</p>
     </div>
+
+    <div class="stepper">
+        <div class="step active" id="step-1">1</div>
+        <div class="step" id="step-2">2</div>
+        <div class="step" id="step-3">3</div>
+    </div>
+
+    {% if student_details %}
+    <div class="student-badge">
+        <div style="width: 48px; height: 48px; background: var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800;">
+            {{ student_details.username|slice:":1"|upper }}
+        </div>
+        <div>
+            <div style="font-weight: 700;">{{ student_details.username }}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">HT: {{ student_details.hallticket_number }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" id="receipt-upload-form">
+        {% csrf_token %}
+
+        {% if amount_mismatch %}
+        <div style="margin-bottom: 28px; padding: 20px; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 20px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px; color: #f59e0b; font-weight: 700;">
+                <i data-lucide="alert-triangle"></i>
+                <span>Amount Verification Required</span>
+            </div>
+            <p style="color: #cbd5e1; font-size: 0.95rem; margin: 0;">
+                You entered <strong>₹{{ form.amount.value }}</strong>, but our AI thinks the receipt shows <strong>₹{{ detected_amount }}</strong>. 
+                Please double-check the image.
+            </p>
+            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; color: #fff; font-weight: 700; margin-top: 10px;">
+                <input type="checkbox" name="ignore_mismatch" value="true" required style="width: 20px; height: 20px;">
+                <span>Yes, I am sure the amount I entered (₹{{ form.amount.value }}) is correct.</span>
+            </label>
+        </div>
+        {% endif %}
+        
+        <div class="form-group">
+            <label>Fee Category</label>
+            {{ form.fee_type }}
+            {% if form.fee_type.errors %}
+                <span class="error-inline">⚠️ {{ form.fee_type.errors|striptags }}</span>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label>Regulation</label>
+            {{ form.regulation }}
+            {% if form.regulation.errors %}
+                <span class="error-inline">⚠️ {{ form.regulation.errors|striptags }}</span>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label>Branch</label>
+            {{ form.branch }}
+            {% if form.branch.errors %}
+                <span class="error-inline">⚠️ {{ form.branch.errors|striptags }}</span>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label>Academic Year</label>
+            {{ form.academic_year }}
+            {% if form.academic_year.errors %}
+                <span class="error-inline">⚠️ {{ form.academic_year.errors|striptags }}</span>
+            {% endif %}
+        </div>
+
+        <div class="form-group" id="exam-cat-group" style="display: none;">
+            <label>Exam Category</label>
+            {{ form.exam_category }}
+        </div>
+
+        <div class="form-group" id="sem-opt-group" style="display: none;">
+            <label>Select Semester</label>
+            {{ form.semester_options }}
+        </div>
+
+        <div class="form-group" id="sup-opt-group" style="display: none;">
+            <label>Supply Type</label>
+            {{ form.supply_options }}
+        </div>
+
+        <div class="form-group">
+            <label>Amount Paid (Optional)</label>
+            {{ form.amount }}
+            <small style="color: var(--text-muted); font-size: 0.8rem; display: block; margin-top: 4px;">Leave blank for AI auto-detection</small>
+            {% if form.amount.errors %}
+                <span class="error-inline">⚠️ {{ form.amount.errors|striptags }}</span>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label>Hallticket Number</label>
+            {{ form.hallticket_number }}
+            {% if form.hallticket_number.errors %}
+                <span class="error-inline">⚠️ {{ form.hallticket_number.errors|striptags }}</span>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label>Payment Proof (Image)</label>
+            <div class="file-upload-box" onclick="document.getElementById('id_image').click();">
+                {{ form.image }}
+                <div id="upload-placeholder">
+                    <i data-lucide="upload-cloud" style="width: 48px; height: 48px; color: var(--primary); margin-bottom: 12px;"></i>
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">Click or drag to upload (JPG, PNG)</div>
+                </div>
+                <img id="image-preview" src="#" alt="Preview">
+            </div>
+            {% if form.image.errors %}
+                <span class="error-inline">⚠️ {{ form.image.errors|striptags }}</span>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="submit-btn-premium" id="submit-btn">Submit Verification Request</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('receipt-upload-form').onsubmit = function() {
+        document.getElementById('processing-overlay').style.display = 'flex';
+    };
+    document.addEventListener('DOMContentLoaded', function() {
+        const feeType = document.getElementById('id_fee_type');
+        const examCat = document.getElementById('id_exam_category');
+        const imageInput = document.getElementById('id_image');
+        const imagePreview = document.getElementById('image-preview');
+        const uploadPlaceholder = document.getElementById('upload-placeholder');
+        
+        const catGroup = document.getElementById('exam-cat-group');
+        const semGroup = document.getElementById('sem-opt-group');
+        const supGroup = document.getElementById('sup-opt-group');
+
+        const step1 = document.getElementById('step-1');
+        const step2 = document.getElementById('step-2');
+        const step3 = document.getElementById('step-3');
+
+        // Apply styles to Django-rendered inputs
+        document.querySelectorAll('input, select').forEach(el => {
+            if (el.type !== 'file' && el.type !== 'submit') {
+                el.classList.add('control-premium');
+            }
+        });
+
+        function updateStepper() {
+            step1.className = 'step completed';
+            step2.className = 'step active';
+            
+            if (feeType.value && (feeType.value !== 'exam' || examCat.value)) {
+                step2.className = 'step completed';
+                step3.className = 'step active';
+            }
+            if (imageInput.files && imageInput.files[0]) {
+                step3.className = 'step completed';
+            }
+        }
+
+        imageInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    uploadPlaceholder.style.display = 'none';
+                }
+                reader.readAsDataURL(this.files[0]);
+                updateStepper();
+            }
+        });
+
+        function toggleDisplay() {
+            const isExam = feeType.value === 'exam';
+            catGroup.style.display = isExam ? 'block' : 'none';
+
+            if (isExam) {
+                semGroup.style.display = (examCat.value === 'regular' || examCat.value === 'supply') ? 'block' : 'none';
+                supGroup.style.display = examCat.value === 'supply' ? 'block' : 'none';
+            } else {
+                semGroup.style.display = 'none';
+                supGroup.style.display = 'none';
+            }
+            updateStepper();
+        }
+
+        function filterSemesters() {
+            const year = document.getElementById('id_academic_year').value;
+            const semSelect = document.getElementById('id_semester_options');
+            const options = semSelect.querySelectorAll('option');
+
+            options.forEach(opt => {
+                if (opt.value === "") {
+                    opt.style.display = "block";
+                    return;
+                }
+                // Check if option value starts with selected year (e.g., '1' matches '1-1')
+                if (opt.value.startsWith(year + "-")) {
+                    opt.style.display = "block";
+                } else {
+                    opt.style.display = "none";
+                }
+            });
+
+            // Reset selection if current value is now hidden
+            const currentOpt = semSelect.querySelector(`option[value="${semSelect.value}"]`);
+            if (currentOpt && currentOpt.style.display === "none") {
+                semSelect.value = "";
+            }
+        }
+
+        feeType.addEventListener('change', toggleDisplay);
+        examCat.addEventListener('change', toggleDisplay);
+        document.getElementById('id_academic_year').addEventListener('change', filterSemesters);
+        
+        toggleDisplay();
+        filterSemesters();
+    });
+</script>
 {% endblock %}

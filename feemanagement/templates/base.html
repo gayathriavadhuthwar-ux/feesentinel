@@ -1,96 +1,504 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
     <title>{% block title %}Fee Management{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
     <style>
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: #f5f6fa;
+        :root {
+            /* Oceanic Night Theme - Ultra Premium */
+            --primary: #0ea5e9;
+            --primary-dark: #0284c7;
+            --primary-glow: rgba(14, 165, 233, 0.4);
+            
+            --secondary: #6366f1;
+            --secondary-dark: #4f46e5;
+            
+            --accent: #f43f5e;
+            --accent-glow: rgba(244, 63, 94, 0.3);
+            
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            
+            /* Backgrounds */
+            --bg-body: #0f172a; /* Deep Navy */
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --bg-glass: rgba(30, 41, 59, 0.5);
+            --border-glass: rgba(255, 255, 255, 0.1);
+            
+            /* Text */
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-on-primary: #ffffff;
+            
+            /* Shadows & Effects */
+            --shadow-premium: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.5);
+            --glass-blur: 16px;
+            --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-body);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.15) 0px, transparent 50%);
+            color: var(--text-main);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Premium Glassmorphism */
+        .glass {
+            background: var(--bg-glass);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--border-glass);
+            box-shadow: var(--shadow-premium);
+        }
+
         .navbar {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: #0077b6;
-            color: #fff;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 1200px;
+            height: 72px;
+            border-radius: 24px;
+            z-index: 1000;
             display: flex;
-            justify-content: center;
             align-items: center;
-            z-index: 100;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 0 32px;
+            transition: var(--transition);
         }
+
         .navbar nav {
             display: flex;
-            gap: 18px;
-            padding: 12px 0;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
         }
+
+        .nav-brand {
+            font-size: 1.6rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-brand img {
+            filter: drop-shadow(0 0 8px var(--primary-glow));
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
         .navbar a {
-            color: #fff;
+            color: var(--text-main);
             text-decoration: none;
             font-weight: 500;
-            font-size: 1.1rem;
-            padding: 6px 12px;
-            border-radius: 6px;
-            transition: background 0.2s;
+            font-size: 0.95rem;
+            padding: 10px 20px;
+            border-radius: 14px;
+            transition: var(--transition);
+            white-space: nowrap;
         }
+
         .navbar a:hover {
-            background: #023e8a;
+            background: rgba(14, 165, 233, 0.1);
+            color: var(--primary);
+            transform: translateY(-2px);
         }
+
+        .navbar a.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 10px 15px -3px var(--primary-glow);
+        }
+
+        .logout-btn-nav {
+            background: rgba(244, 63, 94, 0.1) !important;
+            color: var(--accent) !important;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600 !important;
+        }
+
+        .logout-btn-nav:hover {
+            background: var(--accent) !important;
+            color: white !important;
+            box-shadow: 0 10px 15px -3px var(--accent-glow);
+        }
+
         main {
-            margin-top: 60px;
-            padding: 16px;
+            padding-top: 130px;
+            padding-bottom: 60px;
+            width: 90%;
+            max-width: 1100px;
+            margin: 0 auto;
         }
+
+        /* Modern Typography */
+        h1, h2, h3 {
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            color: #fff;
+        }
+
+        /* Premium Alerts */
         .messages {
             list-style: none;
-            padding: 0;
-            margin-bottom: 18px;
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
         .messages li {
-            background: #fff3cd;
-            color: #856404;
-            border-radius: 6px;
-            padding: 10px;
-            margin-bottom: 8px;
-            font-size: 1rem;
+            padding: 16px 24px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 14px;
+            animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            font-size: 0.95rem;
         }
-        @media (max-width: 600px) {
-            .navbar nav {
-                gap: 8px;
-                padding: 8px 0;
+        .messages li.success { 
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1)); 
+            color: #34d399; 
+            border-color: rgba(16, 185, 129, 0.3); 
+        }
+        .messages li.error { 
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.1)); 
+            color: #f87171; 
+            border-color: rgba(239, 68, 68, 0.3); 
+        }
+        .messages li.warning { 
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.1)); 
+            color: #fbbf24; 
+            border-color: rgba(245, 158, 11, 0.3); 
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-body);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-glass);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-glow);
+        }
+
+        /* Global Form Styles */
+        input:not([type="checkbox"]):not([type="radio"]), select, textarea {
+            width: 100% !important;
+            padding: 18px 24px !important;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.08), rgba(99, 102, 241, 0.08)) !important;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-glass) !important;
+            border-radius: 18px !important;
+            color: var(--text-main) !important;
+            font-family: inherit;
+            font-size: 1.05rem !important;
+            font-weight: 500 !important;
+            transition: var(--transition);
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary) !important;
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(99, 102, 241, 0.15)) !important;
+            box-shadow: 0 0 0 5px var(--primary-glow);
+            transform: translateY(-1px);
+        }
+
+        option {
+            background-color: #1e293b !important;
+            color: #fff !important;
+        }
+
+        /* Password Toggle Styles */
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 20px;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            transition: var(--transition);
+            z-index: 10;
+            background: none;
+            border: none;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .toggle-password:hover {
+            color: var(--primary);
+        }
+
+        .forgot-password-link {
+            display: inline-block;
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            margin-left: 4px;
+        }
+
+        .forgot-password-link:hover {
+            color: var(--secondary);
+            text-decoration: underline;
+        }
+
+        @media (max-width: 1024px) {
+            .navbar {
+                width: 95%;
+                padding: 0 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                top: 0;
+                width: 100%;
+                border-radius: 0 0 24px 24px;
+                height: 70px;
+                padding: 0 16px;
+                border-top: none;
+                border-left: none;
+                border-right: none;
+            }
+            .nav-brand span { font-size: 1.3rem; }
+            .nav-brand img { height: 36px !important; }
+            .nav-links {
+                gap: 6px;
             }
             .navbar a {
-                font-size: 1rem;
-                padding: 6px 8px;
+                padding: 8px 12px;
+                font-size: 0.85rem;
+                border-radius: 10px;
             }
-            main {
-                margin-top: 52px;
-                padding: 8px;
+            main { padding-top: 110px; }
+        }
+
+        @media (max-width: 480px) {
+            .navbar nav {
+                flex-direction: column;
+                justify-content: center;
+                gap: 10px;
+                padding: 10px 0;
             }
+            .navbar {
+                height: auto;
+                padding: 10px;
+                display: none; /* Hide top navbar on mobile to use bottom bar */
+            }
+            .nav-links {
+                width: 100%;
+                overflow-x: auto;
+                padding-bottom: 5px;
+                justify-content: flex-start;
+                scrollbar-width: none;
+            }
+            .nav-links::-webkit-scrollbar {
+                display: none;
+            }
+            main { padding-top: 40px; padding-bottom: 100px; }
+        }
+
+        /* Mobile Bottom Nav */
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 400px;
+            height: 64px;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            display: none;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 2000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .mobile-bottom-nav {
+                display: flex;
+            }
+        }
+
+        .mobile-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.7rem;
+            font-weight: 600;
+            transition: var(--transition);
+            gap: 4px;
+        }
+
+        .mobile-nav-item i {
+            font-size: 1.2rem;
+        }
+
+        .mobile-nav-item.active {
+            color: var(--primary);
+        }
+
+        .mobile-nav-item.active i {
+            transform: translateY(-2px);
+            filter: drop-shadow(0 0 5px var(--primary-glow));
+        }
+
+        .mobile-cta-fab {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-top: -30px;
+            box-shadow: 0 8px 20px var(--primary-glow);
+            border: 4px solid var(--bg-body);
         }
     </style>
 </head>
 <body>
-    <header>
+    <header class="navbar glass">
         <nav>
-            <a href="{% url 'home' %}">Home</a>
-            {% if user.is_authenticated %}
-                {% if user.is_superuser %}
-                    <a href="{% url 'admin_receipts' %}">Admin Receipts</a>
+            <div class="nav-brand">
+                <img src="{% static 'fee/images/logo.jpg' %}" alt="Logo" style="height: 44px; width: auto; border-radius: 8px;">
+                <span>UCEW</span>
+            </div>
+            <div class="nav-links">
+                <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
+                {% if user.is_authenticated %}
+                    {% if user.is_superuser %}
+                        <a href="{% url 'admin_dashboard' %}" class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">Dashboard</a>
+                        <a href="{% url 'admin_receipts' %}" class="{% if request.resolver_match.url_name == 'admin_receipts' %}active{% endif %}">Manage</a>
+                    {% else %}
+                        <a href="{% url 'submit_receipt' %}" class="{% if request.resolver_match.url_name == 'submit_receipt' %}active{% endif %}">Submit</a>
+                        <a href="{% url 'student_receipts' %}" class="{% if request.resolver_match.url_name == 'student_receipts' %}active{% endif %}">History</a>
+                        <a href="{% url 'student_profile' %}" class="{% if request.resolver_match.url_name == 'student_profile' %}active{% endif %}">Profile</a>
+                    {% endif %}
+                    <a href="{% url 'feedback' %}" class="{% if request.resolver_match.url_name == 'feedback' %}active{% endif %}">Feedback</a>
+                    <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="logout-btn-nav logout-btn" style="border:none; cursor:pointer;">Logout</button>
+                    </form>
                 {% else %}
-                    <a href="{% url 'submit_receipt' %}">Submit Receipt</a>
-                    <a href="{% url 'student_receipts' %}">My Receipts</a>
+                    <a href="{% url 'student_auth' %}" class="{% if request.resolver_match.url_name == 'student_auth' %}active{% endif %}">Student Login</a>
+                    <a href="{% url 'admin_auth' %}" class="{% if request.resolver_match.url_name == 'admin_auth' %}active{% endif %}">Admin Login</a>
                 {% endif %}
-                <a href="{% url 'logout' %}">Logout</a>
-            {% else %}
-                <a href="{% url 'student_auth' %}">Student Login/Sign Up</a>
-                <a href="{% url 'admin_auth' %}">Admin Login/Sign Up</a>
-            {% endif %}
+            </div>
         </nav>
     </header>
+
+    {% if user.is_authenticated %}
+    <nav class="mobile-bottom-nav">
+        <a href="{% url 'home' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+            <i data-lucide="home"></i>
+            <span>Home</span>
+        </a>
+        
+        {% if user.is_superuser %}
+            <a href="{% url 'admin_receipts' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'admin_receipts' %}active{% endif %}">
+                <i data-lucide="layers"></i>
+                <span>Manage</span>
+            </a>
+            <a href="{% url 'admin_dashboard' %}" class="mobile-cta-fab">
+                <i data-lucide="layout-dashboard"></i>
+            </a>
+            <a href="{% url 'feedback' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'feedback' %}active{% endif %}">
+                <i data-lucide="message-square"></i>
+                <span>Feedback</span>
+            </a>
+        {% else %}
+            <a href="{% url 'student_receipts' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'student_receipts' %}active{% endif %}">
+                <i data-lucide="history"></i>
+                <span>History</span>
+            </a>
+            <a href="{% url 'submit_receipt' %}" class="mobile-cta-fab">
+                <i data-lucide="plus"></i>
+            </a>
+            <a href="{% url 'student_profile' %}" class="mobile-nav-item {% if request.resolver_match.url_name == 'student_profile' %}active{% endif %}">
+                <i data-lucide="user"></i>
+                <span>Profile</span>
+            </a>
+        {% endif %}
+        
+        <form action="{% url 'logout' %}" method="post" id="mobile-logout-form" style="display:none;">
+            {% csrf_token %}
+        </form>
+        <a href="javascript:document.getElementById('mobile-logout-form').submit();" class="mobile-nav-item">
+            <i data-lucide="log-out"></i>
+            <span>Exit</span>
+        </a>
+    </nav>
+    {% endif %}
 
     <main>
         {% if messages %}
@@ -103,5 +511,43 @@
 
         {% block content %}{% endblock %}
     </main>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        function togglePassword(inputId, btn) {
+            const passwordInput = document.getElementById(inputId);
+            const icon = btn.querySelector('i') || btn.querySelector('svg');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                if (icon) icon.setAttribute('data-lucide', 'eye-off');
+            } else {
+                passwordInput.type = 'password';
+                if (icon) icon.setAttribute('data-lucide', 'eye');
+            }
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        // Global double-submission prevention
+        document.addEventListener('submit', function(e) {
+            const form = e.target;
+            if (form.tagName === 'FORM') {
+                const btn = form.querySelector('button[type="submit"]');
+                if (btn) {
+                    // Slight delay to allow browser to handle the submit before disabling
+                    setTimeout(() => {
+                        btn.disabled = true;
+                        if (btn.innerText.trim() && !btn.querySelector('svg')) {
+                            btn.innerHTML = 'Processing...';
+                        }
+                    }, 0);
+                }
+            }
+        });
+    </script>
 </body>
 </html>

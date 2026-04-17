@@ -26,11 +26,18 @@ class Command(BaseCommand):
         processed = 0
         errors = 0
 
+        from fee.ocr import extract_detailed_data
         for receipt in queryset.iterator():
             try:
-                text, utr, txn_time = extract_text_and_utr_from_image(receipt.image.path)
-                receipt.extracted_text = text
-                receipt.utr = utr
+                data = extract_detailed_data(receipt.image.path)
+                receipt.extracted_text = data['text']
+                receipt.utr = data['utr']
+                receipt.bank_name = data['bank_name']
+                receipt.receiver_name = data['receiver_name']
+                receipt.bank_account_name = data['bank_account_name']
+                receipt.transaction_id = data['transaction_id']
+                
+                txn_time = data['txn_time']
                 if txn_time is not None:
                     if timezone.is_naive(txn_time):
                         txn_time = timezone.make_aware(txn_time, timezone.get_current_timezone())
