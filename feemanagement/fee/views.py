@@ -23,7 +23,7 @@ from .ocr import (
     extract_detailed_data,
 )
 from .utils import check_for_duplicate
-from .utils_pdf import render_to_pdf
+from fee.utils_pdf import render_to_pdf
 
 from functools import wraps
 

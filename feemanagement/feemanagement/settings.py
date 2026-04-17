@@ -13,6 +13,18 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 import dj_database_url
 import os
+import sys
+
+# Startup Debug for Render
+print(f"--- RENDER STARTUP DEBUG ---")
+print(f"CWD: {os.getcwd()}")
+print(f"Python Path: {sys.path}")
+try:
+    print(f"Contents of /app: {os.listdir('/app')}")
+    print(f"Contents of /app/fee: {os.listdir('/app/fee')}")
+except Exception as e:
+    print(f"Debug listing failed: {str(e)}")
+print(f"---------------------------")
 import ssl
 from dotenv import load_dotenv
 
