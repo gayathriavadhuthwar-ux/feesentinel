@@ -69,15 +69,8 @@ def admin_auth(request):
                     return redirect('admin_receipts')
                 messages.error(request, 'Invalid admin credentials.')
         elif action == 'signup':
-            signup_form = AdminRegisterForm(request.POST)
-            if signup_form.is_valid():
-                user = signup_form.save(commit=False)
-                user.set_password(signup_form.cleaned_data['password'])
-                user.is_superuser = True
-                user.is_staff = True
-                user.save()
-                messages.success(request, 'Admin account created. Please log in.')
-                return redirect('admin_auth')
+            messages.error(request, 'Public admin registration is disabled for security. Please contact the system owner.')
+            return redirect('admin_auth')
 
     return render(request, 'registration/admin_auth.html', {
         'login_form': login_form,

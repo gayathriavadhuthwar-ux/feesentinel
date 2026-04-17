@@ -123,10 +123,7 @@
 </style>
 
 <div class="auth-container glass">
-    <div class="auth-tabs">
-        <div class="auth-tab active" onclick="switchTab('login')">Login</div>
-        <div class="auth-tab" onclick="switchTab('signup')">Sign Up</div>
-    </div>
+    <h2 style="text-align: center; color: #fff; margin-bottom: 32px; font-weight: 800; font-size: 1.8rem;">Admin Portal</h2>
 
     <!-- Login Section -->
     <div id="login-section" class="auth-section active">
@@ -158,47 +155,10 @@
         </form>
     </div>
 
-    <!-- Signup Section -->
-    <div id="signup-section" class="auth-section">
-        <form method="post">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="signup">
-            {% for field in signup_form %}
-            <div class="form-group">
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                <div class="{% if field.field.widget.input_type == 'password' %}password-wrapper{% endif %}">
-                    {{ field }}
-                    {% if field.field.widget.input_type == 'password' %}
-                    <button type="button" class="toggle-password"
-                        onclick="togglePassword('{{ field.id_for_label }}', this)">
-                        <i data-lucide="eye"></i>
-                    </button>
-                    {% endif %}
-                </div>
-                {% if field.errors %}
-                <div class="error-text" style="color: #f87171; font-size: 0.9rem; margin-top: 4px;">{{
-                    field.errors|striptags }}</div>
-                {% endif %}
-            </div>
-            {% endfor %}
-            <button type="submit" class="auth-btn">Create Admin Account</button>
-        </form>
-    </div>
 </div>
 
 <script>
-    function switchTab(tab) {
-        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.auth-section').forEach(s => s.classList.remove('active'));
-
-        if (tab === 'login') {
-            document.querySelector('.auth-tab:nth-child(1)').classList.add('active');
-            document.getElementById('login-section').classList.add('active');
-        } else {
-            document.querySelector('.auth-tab:nth-child(2)').classList.add('active');
-            document.getElementById('signup-section').classList.add('active');
-        }
-    }
+    // System locked: Admin registration is disabled.
 </script>
 
 {% endblock %}
