@@ -255,12 +255,12 @@
                 <span>Amount Verification Required</span>
             </div>
             <p style="color: #cbd5e1; font-size: 0.95rem; margin: 0;">
-                You entered <strong>₹{{ form.amount.value }}</strong>, but our AI thinks the receipt shows <strong>₹{{ detected_amount }}</strong>. 
+                You entered <strong id="display-amount">₹{{ form.amount.value }}</strong>, but our AI thinks the receipt shows <strong>₹{{ detected_amount }}</strong>. 
                 Please double-check the image.
             </p>
             <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; color: #fff; font-weight: 700; margin-top: 10px;">
                 <input type="checkbox" name="ignore_mismatch" value="true" required style="width: 20px; height: 20px;">
-                <span>Yes, I am sure the amount I entered (₹{{ form.amount.value }}) is correct.</span>
+                <span id="checkbox-text-amount">Yes, I am sure the amount I entered (₹{{ form.amount.value }}) is correct.</span>
             </label>
         </div>
         {% endif %}
@@ -373,6 +373,17 @@
                 el.classList.add('control-premium');
             }
         });
+
+        const amountInput = document.getElementById('id_amount');
+        if (amountInput) {
+            amountInput.addEventListener('input', function() {
+                const val = this.value || '{{ form.amount.value|default:"" }}';
+                const displayElem = document.getElementById('display-amount');
+                const checkboxText = document.getElementById('checkbox-text-amount');
+                if (displayElem) displayElem.innerText = '₹' + val;
+                if (checkboxText) checkboxText.innerText = 'Yes, I am sure the amount I entered (₹' + val + ') is correct.';
+            });
+        }
 
         function updateStepper() {
             step1.className = 'step completed';
