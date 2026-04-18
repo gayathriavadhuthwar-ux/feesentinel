@@ -168,66 +168,52 @@ def extract_bank_account_name(text: str) -> Optional[str]:
 
 def extract_amount(text: str) -> Optional[float]:
     """Extract payment amount from text."""
-    # Look for INR symbols or "Amount" words followed by numbers
-    patterns = [
-        # Match "₹ 6,451" or "INR 6,451" or "Rs 6,451" (handles spaces/commas)
+    # 1. Strict patterns first: prioritize matching ₹, INR, Rs., Amount, or Paid
+    strict_patterns = [
+        # Match "₹ 6,451" or "INR 6,451" or "Rs 6,451"
         r"(?:INR|₹|Rs\.?)\s*([\d\s,]+(?:\.\d{2})?)",
         # Match "Amount: 6,451"
         r"Amount\s*[:\-]?\s*(?:INR|₹|Rs\.?)?\s*([\d\s,]+(?:\.\d{2})?)",
         # Match "Paid 6,451"
         r"Paid\s*(?:INR|₹|Rs\.?)?\s*([\d\s,]+(?:\.\d{2})?)",
-        # Match plain large number on a line by itself
-        r"^\s*([\d\s,]{3,10}(?:\.\d{2})?)\s*$",
     ]
-    lines = text.split('\n')
-    # Check first few lines for a large number which is likely the amount in UPI apps
-    for line in lines[:5]:
-        line = line.strip()
-        # Look for something like "1,000.00" or "₹1,000" (more flexible regex)
-        match = re.search(r"(?:₹|INR|Rs\.?)?\s*([\d\s,]{3,10}(?:\.\d{2})?)", line, re.IGNORECASE)
-        if match:
-            try:
-                # Remove spaces and commas before converting
-                val_str = match.group(1).replace(',', '').replace(' ', '')
-                val = float(val_str)
-                if val >= 10: # Ignore very small noise numbers
-                    return int(round(val))
-            except ValueError:
-                continue
-
-    for p in patterns:
+    
+    for p in strict_patterns:
         match = re.search(p, text, re.IGNORECASE)
         if match:
             try:
-                # Clean up extracted string
                 raw = match.group(1).replace(',', '').replace(' ', '')
-                
-                # SPECIAL FIX: Common Indian OCR misread symbols at start of amounts
-                # Often '₹' is read as '2', 'z', 'E', 's', or 'l'. 
-                if len(raw) > 3:
-                    first_char = raw[0]
-                    # Targeted fix for misread Rupee symbol as '2' or 'z'
-                    if first_char in '2zE' and len(raw) >= 4:
-                         # Strip the suspect character and see if the rest is a valid amount
-                         try:
-                             stripped_val = int(round(float(raw[1:])))
-                             # If stripping '2' results in a number like 6451 (which is precisely the case reported)
-                             # and the context is payment-related, we prioritize the stripped version.
-                             context = text.lower()
-                             if any(k in context for k in ["fees", "paid", "amount", "total", "successfully", "hostel"]):
-                                 # We log this for confirmation in ocr_debug.txt later
-                                 return stripped_val
-                         except:
-                             pass
-
                 val = int(round(float(raw)))
-                # IGNORE SMALL NOISE: If amount is under 100 and looks like a date/day, ignore it.
-                if val < 100 and any(m in text for m in ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]):
-                    continue
-                
                 return val
             except ValueError:
                 continue
+
+    # 2. Safety Fallback: search for a naked number on the first few lines
+    # This aggressively looks for a line that is MOSTLY just an amount.
+    lines = text.split('\n')
+    for line in lines[:8]:
+        line = line.strip()
+        # Look for full line numbers (e.g. "900" or "900.00" or misread "?900")
+        match = re.search(r"^(?:[A-Za-z\?])?\s*([\d,]{3,10}(?:\.\d{2})?)\s*$", line, re.IGNORECASE)
+        if match:
+            try:
+                val_str = match.group(1).replace(',', '').replace(' ', '')
+                val = float(val_str)
+                
+                # Check for the classic Rupee symbol misread (₹ misread as '3' or '2')
+                # If we parsed a number >= 1000 starting with 2 or 3, strip it.
+                if len(val_str) >= 4 and val_str[0] in ['2', '3']:
+                    stripped_val = int(round(float(val_str[1:])))
+                    # Check context keywords
+                    if any(k in text.lower() for k in ["fees", "paid", "amount", "total", "successful"]):
+                        return stripped_val
+
+                val = int(round(val))
+                if val >= 100: # Ignore dates/days like 31
+                    return val
+            except ValueError:
+                continue
+                
     return None
 
 
