@@ -354,10 +354,8 @@ def submit_receipt(request):
                     })
 
                 if not text:
-                    messages.error(request, "Could not extract any text from the uploaded image. Please try a clearer image.")
-                    if os.path.exists(temp_img_path):
-                        os.remove(temp_img_path)
-                    return redirect('submit_receipt')
+                    messages.warning(request, "Could not extract any text from the uploaded image. Please try a clearer image. It has been submitted for manual review.")
+
 
                 if not utr:
                     messages.warning(request, "No UTR/transaction reference was detected in your receipt. Please check your upload.")

@@ -21,6 +21,7 @@ def check_for_duplicate(receipt):
     recent_receipts = Receipt.objects.filter(submitted_at__gte=threshold_date).exclude(student=receipt.student).exclude(id=receipt.id)
     
     for existing in recent_receipts:
-        if fuzz.ratio(receipt.extracted_text, existing.extracted_text) > 85:  # 85% similarity
-            return existing
+        if receipt.extracted_text and existing.extracted_text:
+            if fuzz.ratio(receipt.extracted_text, existing.extracted_text) > 85:  # 85% similarity
+                return existing
     return None
