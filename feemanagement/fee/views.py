@@ -36,12 +36,13 @@ def superuser_required(view_func):
         return view_func(request, *args, **kwargs)
     return _wrapped_view
 
-def update_student_profile(user, ht_no=None, regulation=None, academic_year=None):
+def update_student_profile(user, ht_no=None, regulation=None, academic_year=None, branch=None):
     """Utility to update or create student profile consistently."""
     defaults = {}
     if ht_no: defaults['hallticket_number'] = ht_no
     if regulation: defaults['regulation'] = regulation
     if academic_year: defaults['academic_year'] = academic_year
+    if branch: defaults['branch'] = branch
     
     if defaults:
         StudentProfile.objects.update_or_create(user=user, defaults=defaults)
@@ -302,9 +303,10 @@ def submit_receipt(request):
             form_ht_no = form.cleaned_data.get('hallticket_number')
             form_reg = form.cleaned_data.get('regulation')
             form_year = form.cleaned_data.get('academic_year')
+            form_branch = form.cleaned_data.get('branch')
             
             if form_ht_no:
-                update_student_profile(request.user, ht_no=form_ht_no, regulation=form_reg, academic_year=form_year)
+                update_student_profile(request.user, ht_no=form_ht_no, regulation=form_reg, academic_year=form_year, branch=form_branch)
             
             receipt.hallticket_number = form_ht_no
             try:
@@ -410,6 +412,7 @@ def submit_receipt(request):
         if student_profile:
             initial_data['regulation'] = student_profile.regulation
             initial_data['academic_year'] = student_profile.academic_year
+            initial_data['branch'] = student_profile.branch
         form = ReceiptUploadForm(initial=initial_data)
     return render(request, 'fee/submit_receipt.html', {'form': form, 'hallticket_number': hallticket_number, 'student_details': student_details})
 
