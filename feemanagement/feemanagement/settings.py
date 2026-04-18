@@ -220,4 +220,10 @@ if not EMAIL_HOST_USER or 'your-email' in EMAIL_HOST_USER:
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # OCR Settings
-TESSERACT_CMD = os.environ.get('TESSERACT_CMD', r'C:\Program Files\Tesseract-OCR\tesseract.exe')
+import platform
+if platform.system() == 'Windows':
+    default_tesseract = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+else:
+    default_tesseract = '/usr/bin/tesseract'
+    
+TESSERACT_CMD = os.environ.get('TESSERACT_CMD', default_tesseract)
