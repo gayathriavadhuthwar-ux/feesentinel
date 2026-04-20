@@ -30,6 +30,13 @@ _UTR_PATTERNS = [
 def _preprocess_image(image_path: str, mode: str = 'normal') -> Image.Image:
     """Load and preprocess an image to improve OCR accuracy."""
     img = Image.open(image_path)
+    
+    # 1. Memory Optimization: Downscale high-resolution images
+    # 512MB RAM is limited; keep images manageable
+    MAX_DIM = 1024
+    if img.width > MAX_DIM or img.height > MAX_DIM:
+        img.thumbnail((MAX_DIM, MAX_DIM), Image.Resampling.LANCZOS)
+
     # Convert to grayscale
     img = img.convert("L")
     
@@ -37,9 +44,7 @@ def _preprocess_image(image_path: str, mode: str = 'normal') -> Image.Image:
     if mode == 'inverted':
         img = ImageOps.invert(img)
     
-    # Resize to improve OCR on small text
-    resample_filter = getattr(Image, 'Resampling', Image).LANCZOS
-    img = img.resize((img.width * 2, img.height * 2), resample_filter)
+    # REMOVED: Doubling image size (too much memory usage)
     
     if mode == 'sharpened':
         enhancer = ImageEnhance.Sharpness(img)
@@ -62,20 +67,31 @@ def extract_text_from_image(image_path: str) -> str:
         img = _preprocess_image(image_path, mode)
         
         # Try multiple OCR configurations per image mode
+        # Priority on --psm 6 (uniform block of text)
         configs = ["--oem 3 --psm 6", "--oem 3 --psm 11"]
         
+        current_mode_text = ""
         for cfg in configs:
             try:
                 text = pytesseract.image_to_string(img, config=cfg).strip()
-                # If we found a valid amount and UTR in this mode, stop early
+                if len(text) > len(current_mode_text):
+                    current_mode_text = text
+                
+                # HEURISTIC: If we found strong indicators in the FIRST mode, stop early to save memory
+                from .ocr import extract_amount, extract_utr_from_text # local import for early checks
                 if extract_amount(text) and extract_utr_from_text(text):
+                    img.close()
                     return text
-                if len(text) > len(best_text):
-                    best_text = text
             except:
                 continue
+        
+        if len(current_mode_text) > len(best_text):
+            best_text = current_mode_text
+        
+        img.close() # Ensure memory is freed
     
     return best_text
+
 
 
 def extract_utr_from_text(text: str) -> Optional[str]:

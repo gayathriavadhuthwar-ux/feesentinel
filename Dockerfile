@@ -40,6 +40,6 @@ RUN python manage.py collectstatic --noinput
 EXPOSE 8000
 
 # Run migrations and then start the project using Gunicorn
-CMD ["sh", "-c", "python manage.py migrate && python manage.py create_demo_users && gunicorn feemanagement.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers ${WEB_CONCURRENCY:-2} --timeout 120"]
+CMD ["sh", "-c", "python manage.py migrate && python manage.py create_demo_users && gunicorn feemanagement.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers ${WEB_CONCURRENCY:-2} --timeout 180"]
 
 
