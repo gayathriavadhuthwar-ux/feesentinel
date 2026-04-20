@@ -218,6 +218,8 @@ def export_receipts_csv(request):
     fee_type_filter = request.GET.get('fee_type')
     regulation_filter = request.GET.get('regulation')
     branch_filter = request.GET.get('branch')
+    academic_year_filter = request.GET.get('academic_year')
+    status_filter = request.GET.get('status')
     date_from = request.GET.get('date_from')
     date_to = request.GET.get('date_to')
     hallticket_filter = request.GET.get('hallticket')
@@ -231,6 +233,10 @@ def export_receipts_csv(request):
         receipts_qs = receipts_qs.filter(regulation=regulation_filter)
     if branch_filter:
         receipts_qs = receipts_qs.filter(branch=branch_filter)
+    if academic_year_filter:
+        receipts_qs = receipts_qs.filter(academic_year=academic_year_filter)
+    if status_filter:
+        receipts_qs = receipts_qs.filter(status=status_filter)
     if date_from:
         receipts_qs = receipts_qs.filter(submitted_at__date__gte=date_from)
     if date_to:
@@ -243,7 +249,7 @@ def export_receipts_csv(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="receipts.csv"'
     writer = csv.writer(response)
-    writer.writerow(['Student', 'Hallticket Number', 'Branch', 'Regulation', 'Fee Type', 'Exam Category', 'Exam Details', 'Submitted At', 'UTR', 'Duplicate', 'Duplicate Of', 'Image URL', 'Extracted Text'])
+    writer.writerow(['Student', 'Hallticket Number', 'Branch', 'Regulation', 'Academic Year', 'Fee Type', 'Exam Category', 'Exam Details', 'Submitted At', 'UTR', 'Duplicate', 'Duplicate Of', 'Image URL', 'Extracted Text'])
 
     for r in receipts_qs:
         writer.writerow([
@@ -251,6 +257,7 @@ def export_receipts_csv(request):
             r.hallticket_number,
             r.get_branch_display() if r.branch else 'N/A',
             r.get_regulation_display() if r.regulation else 'N/A',
+            r.get_academic_year_display() if r.academic_year else 'N/A',
             r.get_fee_type_display(),
             r.get_exam_category_display() if r.fee_type == 'exam' else '',
             r.exam_details if r.fee_type == 'exam' else '',
@@ -446,6 +453,7 @@ def admin_receipts(request):
     fee_type_filter = request.GET.get('fee_type')
     regulation_filter = request.GET.get('regulation')
     branch_filter = request.GET.get('branch')
+    academic_year_filter = request.GET.get('academic_year')
     status_filter = request.GET.get('status')
     date_from = request.GET.get('date_from')
     date_to = request.GET.get('date_to')
@@ -460,6 +468,8 @@ def admin_receipts(request):
         receipts_qs = receipts_qs.filter(regulation=regulation_filter)
     if branch_filter:
         receipts_qs = receipts_qs.filter(branch=branch_filter)
+    if academic_year_filter:
+        receipts_qs = receipts_qs.filter(academic_year=academic_year_filter)
     if status_filter:
         receipts_qs = receipts_qs.filter(status=status_filter)
     if date_from:
@@ -485,6 +495,7 @@ def admin_receipts(request):
         'fee_types': Receipt.FEE_TYPES,
         'regulation_choices': Receipt.REGULATIONS,
         'branch_choices': Receipt.BRANCH_CHOICES,
+        'year_choices': Receipt.ACADEMIC_YEARS,
         'status_choices': Receipt.STATUS_CHOICES,
         'paginator': paginator,
     })

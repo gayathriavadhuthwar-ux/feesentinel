@@ -300,6 +300,16 @@
                 </select>
             </div>
             <div class="filter-group">
+                <label for="id_academic_year">Academic Year</label>
+                <select id="id_academic_year" name="academic_year">
+                    <option value="">All Years</option>
+                    {% for value, display in year_choices %}
+                    <option value="{{ value }}" {% if request.GET.academic_year == value %}selected{% endif %}>{{ display }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
                 <label for="id_status">Status</label>
                 <select id="id_status" name="status">
                     <option value="">All Statuses</option>
