@@ -1,11 +1,13 @@
 from fuzzywuzzy import fuzz
-from .models import Receipt
 
 def check_for_duplicate(receipt):
     """
     Check if the given receipt is a duplicate based on UTR or extracted text similarity.
     Returns (existing receipt, reason_string) if duplicate found, else (None, None).
     """
+    from .models import Receipt
+
+
     # First, check for exact UTR match
     if receipt.utr:
         duplicate = Receipt.objects.filter(utr=receipt.utr).exclude(id=receipt.id).first()
