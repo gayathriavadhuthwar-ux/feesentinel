@@ -5,6 +5,7 @@ services:
     runtime: docker
     plan: free # or starter
     healthCheckPath: /
+    preDeployCommand: python manage.py migrate && python manage.py create_demo_users
     envVars:
       - key: DEBUG
         value: "False"
