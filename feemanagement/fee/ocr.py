@@ -59,36 +59,23 @@ def _preprocess_image(image_path: str, mode: str = 'normal') -> Image.Image:
 
 
 def extract_text_from_image(image_path: str) -> str:
-    """Extract text using multi-pass strategy (Normal, Inverted, Sharpened)."""
-    modes = ['normal', 'inverted', 'sharpened']
+    """Extract text using a single, fast pass to prevent server timeouts."""
+    # We restrict to a single fast pass because Render has a 100-second proxy timeout.
+    # Running multiple enhancements forces timeouts (502 Gateway) on hard-to-read images.
     best_text = ""
     
-    for mode in modes:
-        img = _preprocess_image(image_path, mode)
-        
-        # Try multiple OCR configurations per image mode
-        # Priority on --psm 6 (uniform block of text)
-        configs = ["--oem 3 --psm 6", "--oem 3 --psm 11"]
-        
-        current_mode_text = ""
-        for cfg in configs:
-            try:
-                text = pytesseract.image_to_string(img, config=cfg).strip()
-                if len(text) > len(current_mode_text):
-                    current_mode_text = text
-                
-                # HEURISTIC: If we found strong indicators in the FIRST mode, stop early to save memory
-                from .ocr import extract_amount, extract_utr_from_text # local import for early checks
-                if extract_amount(text) and extract_utr_from_text(text):
-                    img.close()
-                    return text
-            except:
-                continue
-        
-        if len(current_mode_text) > len(best_text):
-            best_text = current_mode_text
-        
-        img.close() # Ensure memory is freed
+    try:
+        img = _preprocess_image(image_path, 'normal')
+        # Only use the most reliable configuration
+        cfg = "--oem 3 --psm 6"
+        best_text = pytesseract.image_to_string(img, config=cfg).strip()
+    except Exception as e:
+        print(f"OCR Exception: {e}")
+    finally:
+        if 'img' in locals():
+            img.close() # Ensure memory is freed immediately
+    
+    return best_text
     
     return best_text
 

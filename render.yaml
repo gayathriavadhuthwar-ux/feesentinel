@@ -18,7 +18,7 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: WEB_CONCURRENCY
-        value: 2
+        value: 1
       # Cloudinary Config (User will need to set these in Render dashboard)
       - key: CLOUDINARY_CLOUD_NAME
         sync: false
