@@ -4,6 +4,7 @@ services:
     name: fee-management
     runtime: docker
     plan: free # or starter
+    healthCheckPath: /
     envVars:
       - key: DEBUG
         value: "False"

@@ -350,8 +350,7 @@
             {% if receipt.fee_type == 'exam' %}
             <div class="receipt-field">
                 <span class="field-label">Exam Details</span>
-                <span class="field-value">{{ receipt.get_exam_category_display|default:"N/A" }} ({{
-                    receipt.exam_details|default:"N/A" }})</span>
+                <span class="field-value">{{ receipt.get_exam_category_display|default:"N/A" }} ({{ receipt.exam_details|default:"N/A" }})</span>
             </div>
             {% endif %}
             <div class="receipt-field">
@@ -360,8 +359,7 @@
             </div>
             <div class="receipt-field">
                 <span class="field-label">Fee Paid</span>
-                <span class="field-value" style="color: #10b981; font-weight: 800;">&#8377;{{
-                    receipt.amount|default:"0" }}</span>
+                <span class="field-value" style="color: #10b981; font-weight: 800;">&#8377;{{ receipt.amount|default:"0" }}</span>
             </div>
             <div class="receipt-field">
                 <span class="field-label">Status</span>

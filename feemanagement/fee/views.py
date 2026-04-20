@@ -367,11 +367,11 @@ def submit_receipt(request):
                         txn_time = timezone.make_aware(txn_time, timezone.get_current_timezone())
                     receipt.transaction_at = txn_time
 
-                duplicate_receipt = check_for_duplicate(receipt)
+                duplicate_receipt, duplicate_reason = check_for_duplicate(receipt)
                 if duplicate_receipt:
                     receipt.is_duplicate = True
                     receipt.duplicate_of = duplicate_receipt
-                    messages.error(request, f"Duplicate detected: This receipt appears to match a previous submission by {duplicate_receipt.student.username}. If you believe this is an error, please contact support.")
+                    messages.error(request, f"Duplicate detected: {duplicate_reason} If you believe this is an error, please contact support.")
                     send_mail(
                         'Duplicate Receipt Submitted',
                         f'Student {request.user.username} submitted a duplicate receipt similar to one by {duplicate_receipt.student.username}.',

@@ -167,8 +167,13 @@ def extract_bank_account_name(text: str) -> Optional[str]:
 
 
 def extract_amount(text: str) -> Optional[float]:
-    """Extract payment amount from text."""
-    # 1. Strict patterns first: prioritize matching ₹, INR, Rs., Amount, or Paid
+    """Extract payment amount from text with improved robustness."""
+    if not text:
+        return None
+
+    potential_amounts = []
+
+    # 1. Strict patterns: match entries preceded by currency symbols or labels
     strict_patterns = [
         # Match "₹ 6,451" or "INR 6,451" or "Rs 6,451"
         r"(?:INR|₹|Rs\.?)\s*([\d\s,]+(?:\.\d{2})?)",
@@ -179,21 +184,22 @@ def extract_amount(text: str) -> Optional[float]:
     ]
     
     for p in strict_patterns:
-        match = re.search(p, text, re.IGNORECASE)
-        if match:
+        matches = re.finditer(p, text, re.IGNORECASE)
+        for match in matches:
             try:
                 raw = match.group(1).replace(',', '').replace(' ', '')
-                val = int(round(float(raw)))
-                return val
+                if not raw: continue
+                val = float(raw)
+                # Save value and whether it has strong currency context
+                potential_amounts.append({'val': val, 'priority': 2, 'raw': raw})
             except ValueError:
                 continue
 
-    # 2. Safety Fallback: search for a naked number on the first few lines
-    # This aggressively looks for a line that is MOSTLY just an amount.
+    # 2. Safety Fallback: search for naked numbers on lines that look like amounts
     lines = text.split('\n')
-    for line in lines[:8]:
+    for line in lines[:10]:
         line = line.strip()
-        # Look for full line numbers (e.g. "900" or "900.00" or misread "?900")
+        # Look for line-level numbers (e.g. "900" or "900.00" or misread "?900")
         match = re.search(r"^(?:[A-Za-z\?])?\s*([\d,]{3,10}(?:\.\d{2})?)\s*$", line, re.IGNORECASE)
         if match:
             try:
@@ -201,20 +207,60 @@ def extract_amount(text: str) -> Optional[float]:
                 val = float(val_str)
                 
                 # Check for the classic Rupee symbol misread (₹ misread as '3' or '2')
-                # If we parsed a number >= 1000 starting with 2 or 3, strip it.
+                # If we parsed a number >= 1000 starting with 2 or 3, it might be a misread.
                 if len(val_str) >= 4 and val_str[0] in ['2', '3']:
-                    stripped_val = int(round(float(val_str[1:])))
-                    # Check context keywords
-                    if any(k in text.lower() for k in ["fees", "paid", "amount", "total", "successful"]):
-                        return stripped_val
+                    stripped_val = float(val_str[1:])
+                    # If common keywords exist, strongly prefer the stripped version
+                    context_keywords = ["fees", "paid", "amount", "total", "successful", "ref", "utr"]
+                    has_context = any(k in text.lower() for k in context_keywords)
+                    
+                    if has_context:
+                        potential_amounts.append({'val': stripped_val, 'priority': 1.5, 'raw': val_str[1:]})
+                    else:
+                        potential_amounts.append({'val': stripped_val, 'priority': 1, 'raw': val_str[1:]})
 
-                val = int(round(val))
-                if val >= 100: # Ignore dates/days like 31
-                    return val
+                potential_amounts.append({'val': val, 'priority': 1, 'raw': val_str})
             except ValueError:
                 continue
-                
-    return None
+
+    if not potential_amounts:
+        return None
+
+    # Filter and sort potential amounts
+    # Rules:
+    # - Ignore common year numbers if priority is low
+    # - Prefer priority 2 (strict matches) over priority 1
+    # - Prefer larger amounts within common fee ranges (100 - 200,000)
+    
+    valid_amounts = []
+    current_year = datetime.now().year
+    years_to_ignore = {current_year, current_year-1, current_year+1, current_year-2}
+
+    for item in potential_amounts:
+        val = item['val']
+        # Round to integer for the final value
+        v_int = int(round(val))
+        
+        # Heuristic: Ignore numbers that look like years unless they have strict context
+        if item['priority'] < 2 and v_int in years_to_ignore:
+            continue
+            
+        # Ignore very small numbers as amounts unless they have strict context and are >= 10
+        if v_int < 100 and item['priority'] < 2:
+            continue
+            
+        if v_int < 1:
+            continue
+
+        valid_amounts.append(item)
+
+    if not valid_amounts:
+        return None
+
+    # Sort by priority desc, then by value desc (prefer largest amount in strict context)
+    valid_amounts.sort(key=lambda x: (x['priority'], x['val']), reverse=True)
+    
+    return int(round(valid_amounts[0]['val']))
 
 
 def extract_transaction_id(text: str) -> Optional[str]:

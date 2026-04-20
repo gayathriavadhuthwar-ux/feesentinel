@@ -44,7 +44,7 @@ class Command(BaseCommand):
                     receipt.transaction_at = txn_time
 
                 # Mark duplicates based on UTR or similarity
-                duplicate = check_for_duplicate(receipt)
+                duplicate, _ = check_for_duplicate(receipt)
                 if duplicate:
                     receipt.is_duplicate = True
                     receipt.duplicate_of = duplicate

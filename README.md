@@ -1,43 +1,45 @@
-# Fee Management App
+# Fee Management System (UCEW)
+
+A modern, AI-powered fee management system for students and administrators.
 
 ## Features
-- Student and admin login/signup
-- Receipt submission and extraction
-- Admin dashboard with filters and export
-- Mobile-friendly, modern UI
-- Feedback form for user suggestions
+- **AI-Powered OCR**: Automatically extracts Transaction IDs, Amounts, and Bank details from payment receipts.
+- **Improved Detection**: Robust logic to distinguish between amounts, dates, and common OCR misreads.
+- **Duplicate Prevention**: Specific feedback when a duplicate receipt is detected (UTR ID or content match).
+- **Admin Dashboard**: Comprehensive management tools with filtering, verification workflows, and CSV export.
+- **Mobile-First Design**: Premium, responsive UI built for all devices.
 
-## Setup
-1. Clone the repo
-2. Create a virtual environment and install dependencies:
+## Local Setup
+1. Clone the repository.
+2. Create and activate a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
-   python -m venv env
-   env\Scripts\activate
+3. Install dependencies:
+   ```bash
    pip install -r requirements.txt
    ```
-3. Run migrations:
-   ```
-   python manage.py migrate
-   ```
-4. Start the server:
-   ```
-   python manage.py runserver
+4. Run migrations and start the server:
+   ```bash
+   python feemanagement/manage.py migrate
+   python feemanagement/manage.py runserver
    ```
 
-## Deployment (Heroku)
-1. Install Heroku CLI
-2. Login: `heroku login`
-3. Create app: `heroku create`
-4. Push code: `git push heroku main`
-5. Set up environment variables and database
+## Deployment (Render)
+This project is configured for deployment on **Render** using **Docker**.
 
-## Feedback
-- Users can submit feedback via the feedback form on the home page.
-- Feedback is sent to admin email or stored in the database.
+1. **GitHub Connection**: Connect this repository to your Render account.
+2. **Web Service**: Create a new Web Service using the `Dockerfile`.
+3. **Database**: Render will automatically create a PostgreSQL database as defined in `render.yaml`.
+4. **Environment Variables**:
+   - Set `PROD_ENV=True`
+   - Set `DEBUG=False`
+   - Configure Cloudinary and Email credentials in the Render dashboard.
 
-## Usage
-- Students: Register, login, submit receipts, view receipts
-- Admins: Login, view all receipts, filter, export CSV
+## Maintenance
+- **OCR Refresh**: Run `python manage.py refresh_receipts_ocr` to re-process existing receipts with the latest extraction logic.
 
 ## License
 MIT
+
