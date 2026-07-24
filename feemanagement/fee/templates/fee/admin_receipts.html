@@ -382,6 +382,11 @@
                         <i data-lucide="alert-circle" style="width:12px; height:12px;"></i>
                         DUPLICATE
                     </span>
+                    {% else %}
+                    <span class="badge-premium badge-original" style="display: flex; align-items: center; gap: 4px; background: #e0f2fe; color: #0369a1;">
+                        <i data-lucide="check-circle" style="width:12px; height:12px;"></i>
+                        ORIGINAL
+                    </span>
                     {% endif %}
                 </div>
             </div>
@@ -410,19 +415,7 @@
             </a>
         </div>
 
-        {% if receipt.status == 'pending' %}
-        <div class="action-container">
-            <a href="{% url 'admin_approve_receipt' receipt.id %}" class="btn-premium btn-approve-p">
-                <i data-lucide="check-circle" style="width:18px; height:18px;"></i>
-                Approve Verification
-            </a>
-            <button class="btn-premium btn-reject-p" data-id="{{ receipt.id }}"
-                onclick="openRejectModal(this.getAttribute('data-id'))">
-                <i data-lucide="x-circle" style="width:18px; height:18px;"></i>
-                Reject Submission
-            </button>
-        </div>
-        {% endif %}
+        <!-- Manual approval/rejection buttons removed as per auto-approve/reject logic -->
 
         {% if receipt.status == 'rejected' and receipt.rejection_reason %}
         <div

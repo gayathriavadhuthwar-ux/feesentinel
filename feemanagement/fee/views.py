@@ -331,6 +331,18 @@ def submit_receipt(request):
                 text = data['text']
                 utr = data['utr']
                 txn_time = data['txn_time']
+                
+                # Validation for Exam Fee Account
+                if receipt.fee_type == 'exam' and text:
+                    normalized_text = text.replace(' ', '').replace('-', '').upper()
+                    has_acc = '41276761385' in normalized_text
+                    has_bank = data.get('bank_name') in ['State Bank of India', 'SBI'] or 'STATEBANK' in normalized_text or 'SBI' in normalized_text
+                    
+                    if not has_acc or not has_bank:
+                        messages.error(request, "Submission Rejected: Exam fee must be paid only to State Bank of India, Account No: 41276761385. The submitted receipt does not match these details.")
+                        if os.path.exists(temp_img_path):
+                            os.remove(temp_img_path)
+                        return redirect('submit_receipt')
 
                 receipt.extracted_text = text
                 receipt.utr = utr
@@ -378,29 +390,50 @@ def submit_receipt(request):
                 if duplicate_receipt:
                     receipt.is_duplicate = True
                     receipt.duplicate_of = duplicate_receipt
-                    messages.error(request, f"Duplicate detected: {duplicate_reason} If you believe this is an error, please contact support.")
+                    receipt.status = 'rejected'
+                    receipt.rejection_reason = f"Duplicate detected: {duplicate_reason}"
+                    receipt.processed_at = timezone.now()
+                    messages.error(request, f"Duplicate detected: {duplicate_reason} Your submission has been automatically rejected. If you believe this is an error, please contact support.")
                     send_mail(
-                        'Duplicate Receipt Submitted',
-                        f'Student {request.user.username} submitted a duplicate receipt similar to one by {duplicate_receipt.student.username}.',
-                        'admin@feemanagement.com',
-                        ['admin@example.com'],
-                        fail_silently=True,
-                    )
-                else:
-                    messages.success(request, f"Receipt submitted successfully! Your transaction reference: {utr if utr else 'N/A'}")
-                    # Send confirmation email to student
-                    send_mail(
-                        'Receipt Submission Confirmed',
-                        f'Dear {request.user.username},\n\n'
-                        f'We have received your receipt for {receipt.get_fee_type_display()}.\n'
-                        f'Transaction Reference: {receipt.utr if receipt.utr else "N/A"}\n'
-                        f'Amount: {receipt.amount if receipt.amount else "N/A"}\n'
-                        f'Status: Pending Review\n\n'
-                        f'Thank you,\nFee Management Team',
+                        'Duplicate Receipt Rejected',
+                        f'Dear {request.user.username},\n\nYour receipt submission was rejected because a duplicate was detected: {duplicate_reason}',
                         'admin@feemanagement.com',
                         [request.user.email],
                         fail_silently=True,
                     )
+                else:
+                    if text and utr:
+                        receipt.status = 'approved'
+                        receipt.processed_at = timezone.now()
+                        messages.success(request, f"Receipt submitted and automatically approved! Your transaction reference: {utr}")
+                        # Send confirmation email to student
+                        send_mail(
+                            'Receipt Submission Approved',
+                            f'Dear {request.user.username},\n\n'
+                            f'We have received and automatically approved your receipt for {receipt.get_fee_type_display()}.\n'
+                            f'Transaction Reference: {receipt.utr}\n'
+                            f'Amount: {receipt.amount if receipt.amount else "N/A"}\n'
+                            f'Status: Approved\n\n'
+                            f'Thank you,\nFee Management Team',
+                            'admin@feemanagement.com',
+                            [request.user.email],
+                            fail_silently=True,
+                        )
+                    else:
+                        messages.success(request, f"Receipt submitted successfully! Your transaction reference: {utr if utr else 'N/A'}")
+                        # Send confirmation email to student
+                        send_mail(
+                            'Receipt Submission Confirmed',
+                            f'Dear {request.user.username},\n\n'
+                            f'We have received your receipt for {receipt.get_fee_type_display()}.\n'
+                            f'Transaction Reference: {receipt.utr if receipt.utr else "N/A"}\n'
+                            f'Amount: {receipt.amount if receipt.amount else "N/A"}\n'
+                            f'Status: Pending Review\n\n'
+                            f'Thank you,\nFee Management Team',
+                            'admin@feemanagement.com',
+                            [request.user.email],
+                            fail_silently=True,
+                        )
 
                 with open(temp_img_path, 'rb') as f:
                     receipt.image.save(image_file.name, File(f), save=False)
