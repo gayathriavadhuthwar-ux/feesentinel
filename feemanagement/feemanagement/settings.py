@@ -28,10 +28,6 @@ print(f"---------------------------")
 import ssl
 from dotenv import load_dotenv
 
-# Global SSL Fix for SMTP Certificate Verification
-ssl._create_default_https_context = ssl._create_unverified_context
-ssl.create_default_context = ssl._create_unverified_context
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
