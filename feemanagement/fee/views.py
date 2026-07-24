@@ -47,6 +47,27 @@ def update_student_profile(user, ht_no=None, regulation=None, academic_year=None
     if defaults:
         StudentProfile.objects.update_or_create(user=user, defaults=defaults)
 
+# Health check endpoint for diagnosing production 500 errors
+from django.http import HttpResponse
+def health_check(request):
+    try:
+        from django.db import connection
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+        db_status = "OK"
+    except Exception as e:
+        db_status = f"ERROR: {e}"
+    try:
+        from django.contrib.sessions.backends.db import SessionStore
+        s = SessionStore()
+        session_status = "OK"
+    except Exception as e:
+        session_status = f"ERROR: {e}"
+    return HttpResponse(
+        f"DB: {db_status}\nSessions: {session_status}\nDjango: OK",
+        content_type="text/plain"
+    )
+
 # Combined Admin Auth View (Login/Signup)
 def admin_auth(request):
     if request.user.is_authenticated:
