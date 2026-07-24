@@ -8,7 +8,7 @@ services:
     preDeployCommand: python manage.py migrate && python manage.py create_demo_users
     envVars:
       - key: DEBUG
-        value: "False"
+        value: "True"
       - key: PROD_ENV
         value: "True"
       - key: DATABASE_URL
